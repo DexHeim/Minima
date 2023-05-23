@@ -234,7 +234,7 @@ public class MySQLConnect {
 				SQL_INSERT_COINS.execute();
 
 				// Log it.
-				MinimaLogger.log(cc.toJSON());
+				MinimaLogger.log(cc.toJSON().toString());
 			}
 
 			// Spent coins
@@ -260,7 +260,7 @@ public class MySQLConnect {
 				SQL_INSERT_COINS.execute();
 
 				// Log it.
-				MinimaLogger.log(buffCoin.toJSON());
+				MinimaLogger.log(buffCoin.toJSON().toString());
 			}
 
 			// Transactions in a block
