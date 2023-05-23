@@ -11,9 +11,19 @@ import java.util.ArrayList;
 import org.minima.database.cascade.Cascade;
 import org.minima.objects.TxBlock;
 import org.minima.objects.TxPoW;
+import org.minima.objects.TxBody;
 import org.minima.objects.base.MiniData;
 import org.minima.objects.base.MiniNumber;
 import org.minima.utils.MinimaLogger;
+
+import org.minima.utils.Streamable;
+import org.minima.objects.Coin;
+import org.minima.objects.CoinProof;
+import org.minima.objects.Address;
+
+import org.minima.database.MinimaDB;
+import org.minima.database.txpowdb.sql.TxPoWList;
+import org.minima.objects.Transaction;
 
 public class MySQLConnect {
 
@@ -39,6 +49,8 @@ public class MySQLConnect {
 	
 	PreparedStatement SAVE_CASCADE				= null;
 	PreparedStatement LOAD_CASCADE				= null;
+	
+	PreparedStatement SQL_INSERT_COINS = null;
 	
 	public MySQLConnect(String zHost, String zDatabase, String zUsername, String zPassword) {
 		mMySQLHost 	= zHost;
@@ -77,6 +89,23 @@ public class MySQLConnect {
 		//Run it..
 		stmt.execute(cascade);
 		
+
+		//Create the coins table
+		String coins = "CREATE TABLE IF NOT EXISTS `coins` ("
+						+ "  `id` INT NOT NULL AUTO_INCREMENT PRIMARY KEY,"
+						+ "  `block` BIGINT NOT NULL,"
+						+ "  `coinid` varchar(80) NOT NULL UNIQUE,"
+						+ "  `amount` varchar(80) NULL,"
+						+ "  `address` varchar(80) NOT NULL,"
+						+ "  `miniaddress` varchar(80) NOT NULL,"
+						+ "  `tokenid` varchar(80) NOT NULL,"
+						+ "  `mmrentry` varchar(20) NOT NULL,"
+						+ "  `created` varchar(20) NOT NULL,"
+						+ "  `block_sended` BIGINT DEFAULT 0 NOT NULL"
+						+ ")";
+
+		//Run it..
+		stmt.execute(coins);
 		//All done..
 		stmt.close();
 		
@@ -92,6 +121,9 @@ public class MySQLConnect {
 		
 		SAVE_CASCADE = mConnection.prepareStatement("INSERT INTO cascadedata ( cascadetip, fulldata ) VALUES ( ?, ? )");
 		LOAD_CASCADE = mConnection.prepareStatement("SELECT fulldata FROM cascadedata ORDER BY cascadetip ASC LIMIT 1");
+
+		String insert_coins 			= "INSERT INTO coins ( block, coinid, amount, address, miniaddress, tokenid, mmrentry, created ) VALUES ( ?, ? ,? ,? ,? ,? ,? ,? ) AS new ON DUPLICATE KEY UPDATE mmrentry = new.mmrentry, created = new.created, block_sended = new.block";
+		SQL_INSERT_COINS 	= mConnection.prepareStatement(insert_coins);
 	}
 	
 	public void shutdown() {
@@ -108,6 +140,7 @@ public class MySQLConnect {
 		Statement stmt = mConnection.createStatement();
 		stmt.execute("DROP TABLE syncblock");
 		stmt.execute("DROP TABLE cascadedata");
+		stmt.execute("DROP TABLE coins");
 		stmt.close();
 	}
 	
@@ -178,6 +211,74 @@ public class MySQLConnect {
 			
 //			MinimaLogger.log("MYSQL stored synvblock "+zBlock.getTxPoW().getBlockNumber());
 			
+			// Save coins from a block
+
+			// Created coins
+
+			//Set main params
+			ArrayList<Coin> outputs = zBlock.getOutputCoins();
+
+			for(Coin cc : outputs) {
+				SQL_INSERT_COINS.clearParameters();
+
+				SQL_INSERT_COINS.setLong(1, zBlock.getTxPoW().getBlockNumber().getAsLong());
+				SQL_INSERT_COINS.setString(2, cc.getCoinID().to0xString());
+				SQL_INSERT_COINS.setString(3, cc.getAmount().toString());
+				SQL_INSERT_COINS.setString(4, cc.getAddress().to0xString());
+				SQL_INSERT_COINS.setString(5, Address.makeMinimaAddress(cc.getAddress()));
+				SQL_INSERT_COINS.setString(6, cc.getTokenID().to0xString());
+				SQL_INSERT_COINS.setString(7, cc.getMMREntryNumber().toString());
+				SQL_INSERT_COINS.setString(8, cc.getBlockCreated().toString());
+
+				//Do it.
+				SQL_INSERT_COINS.execute();
+			}
+
+			// Spent coins
+
+			ArrayList<CoinProof> inputs = zBlock.getInputCoinProofs();
+			//Set main params
+			for(CoinProof incoin : inputs) {
+				//Get the Query ready
+				SQL_INSERT_COINS.clearParameters();
+
+				Coin buffCoin = incoin.getCoin();
+
+				SQL_INSERT_COINS.setLong(1, zBlock.getTxPoW().getBlockNumber().getAsLong());
+				SQL_INSERT_COINS.setString(2, buffCoin.getCoinID().to0xString());
+				SQL_INSERT_COINS.setString(3, buffCoin.getAmount().toString());
+				SQL_INSERT_COINS.setString(4, buffCoin.getAddress().to0xString());
+				SQL_INSERT_COINS.setString(5, Address.makeMinimaAddress(buffCoin.getAddress()));
+				SQL_INSERT_COINS.setString(6, buffCoin.getTokenID().to0xString());
+				SQL_INSERT_COINS.setString(7, buffCoin.getMMREntryNumber().toString());
+				SQL_INSERT_COINS.setString(8, buffCoin.getBlockCreated().toString());
+
+				//Do it.
+				SQL_INSERT_COINS.execute();
+			}
+
+			// Transactions in a block
+
+			//TxPoW zPoW = zBlock.getTxPoW();
+			//TxBody zBody = zPoW.getTxBody();
+
+			/*
+			ArrayList<MiniData> txns = zBlock.getTxPoW().getBlockTransactions();
+			ArrayList<String> stxns = new ArrayList<>();
+			for(MiniData txn : txns) {
+				stxns.add(txn.toString());
+				MinimaLogger.log("Parse transactions from block with TxPOW: "+txn.toString());
+			}
+
+			ArrayList<TxPoW> txps = MinimaDB.getDB().getTxPoWDB().getAllTxPoW(stxns);
+
+			for(TxPoW txp : txps) {
+				MinimaLogger.log("Parse transactions from block "+zBlock.getTxPoW().getBlockNumber()+": "+txp.getTransaction().toJSON());
+			}
+			*/
+
+			//MinimaLogger.log("Block "+zBlock.getTxPoW().getBlockNumber()+" have a body: "+zBody.toJSON());
+
 			return true;
 			
 		} catch (SQLException e) {
