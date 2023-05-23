@@ -27,15 +27,15 @@ import org.minima.objects.Transaction;
 
 public class MySQLConnect {
 
-	public static final int MAX_SYNCBLOCKS = 250; 
-	
+	public static final int MAX_SYNCBLOCKS = 250;
+
 	String mMySQLHost;
 	String mDatabase;
 	String mUsername;
 	String mPassword;
-	
+
 	Connection mConnection;
-	
+
 	/**
 	 * PreparedStatements
 	 */
@@ -43,30 +43,30 @@ public class MySQLConnect {
 	PreparedStatement SQL_FIND_SYNCBLOCK_ID 	= null;
 	PreparedStatement SQL_FIND_SYNCBLOCK_NUM 	= null;
 	PreparedStatement SQL_SELECT_RANGE			= null;
-	
+
 	PreparedStatement SQL_SELECT_LAST_BLOCK		= null;
 	PreparedStatement SQL_SELECT_FIRST_BLOCK	= null;
-	
+
 	PreparedStatement SAVE_CASCADE				= null;
 	PreparedStatement LOAD_CASCADE				= null;
-	
+
 	PreparedStatement SQL_INSERT_COINS = null;
-	
+
 	public MySQLConnect(String zHost, String zDatabase, String zUsername, String zPassword) {
 		mMySQLHost 	= zHost;
 		mDatabase	= zDatabase;
 		mUsername	= zUsername;
 		mPassword	= zPassword;
 	}
-	
+
 	public void init() throws SQLException {
 		//MYSQL JDBC connection
 		String mysqldb = "jdbc:mysql://"+mMySQLHost+"/"+mDatabase+"?autoReconnect=true";
-				
+
 		mConnection = DriverManager.getConnection(mysqldb,mUsername,mPassword);
-	
+
 		Statement stmt = mConnection.createStatement();
-		
+
 		//Create a new DB
 		String create = "CREATE TABLE IF NOT EXISTS `syncblock` ("
 						+ "  `id` INT NOT NULL AUTO_INCREMENT PRIMARY KEY,"
@@ -75,20 +75,20 @@ public class MySQLConnect {
 						+ "  `timemilli` bigint NOT NULL,"
 						+ "  `syncdata` mediumblob NOT NULL"
 						+ ")";
-		
+
 		//Run it..
 		stmt.execute(create);
-		
+
 		//Create the cascade table
 		String cascade = "CREATE TABLE IF NOT EXISTS `cascadedata` ("
 						+ "		`id` INT NOT NULL AUTO_INCREMENT PRIMARY KEY,"
 						+ "		`cascadetip` BIGINT NOT NULL,"
 						+ "		`fulldata` mediumblob NOT NULL"
 						+ ")";
-		
+
 		//Run it..
 		stmt.execute(cascade);
-		
+
 
 		//Create the coins table
 		String coins = "CREATE TABLE IF NOT EXISTS `coins` ("
@@ -108,24 +108,24 @@ public class MySQLConnect {
 		stmt.execute(coins);
 		//All done..
 		stmt.close();
-		
+
 		//Create some prepared statements..
 		String insert 			= "INSERT IGNORE INTO syncblock ( txpowid, block, timemilli, syncdata ) VALUES ( ?, ? ,? ,? )";
 		SQL_INSERT_SYNCBLOCK 	= mConnection.prepareStatement(insert);
 		SQL_FIND_SYNCBLOCK_ID 	= mConnection.prepareStatement("SELECT syncdata FROM syncblock WHERE txpowid=?");
 		SQL_FIND_SYNCBLOCK_NUM 	= mConnection.prepareStatement("SELECT syncdata FROM syncblock WHERE block=?");
 		SQL_SELECT_RANGE		= mConnection.prepareStatement("SELECT syncdata FROM syncblock WHERE block>=? ORDER BY block ASC LIMIT "+MAX_SYNCBLOCKS);
-		
+
 		SQL_SELECT_LAST_BLOCK	= mConnection.prepareStatement("SELECT block FROM syncblock ORDER BY block ASC LIMIT 1");
 		SQL_SELECT_FIRST_BLOCK	= mConnection.prepareStatement("SELECT block FROM syncblock ORDER BY block DESC LIMIT 1");
-		
+
 		SAVE_CASCADE = mConnection.prepareStatement("INSERT INTO cascadedata ( cascadetip, fulldata ) VALUES ( ?, ? )");
 		LOAD_CASCADE = mConnection.prepareStatement("SELECT fulldata FROM cascadedata ORDER BY cascadetip ASC LIMIT 1");
 
 		String insert_coins 			= "INSERT INTO coins ( block, coinid, amount, address, miniaddress, tokenid, mmrentry, created ) VALUES ( ?, ? ,? ,? ,? ,? ,? ,? ) AS new ON DUPLICATE KEY UPDATE mmrentry = new.mmrentry, created = new.created, block_sended = new.block";
 		SQL_INSERT_COINS 	= mConnection.prepareStatement(insert_coins);
 	}
-	
+
 	public void shutdown() {
 		try {
 			if(!mConnection.isClosed()) {
@@ -135,7 +135,7 @@ public class MySQLConnect {
 			MinimaLogger.log(e);
 		}
 	}
-	
+
 	public void wipeAll() throws SQLException {
 		Statement stmt = mConnection.createStatement();
 		stmt.execute("DROP TABLE syncblock");
@@ -143,74 +143,74 @@ public class MySQLConnect {
 		stmt.execute("DROP TABLE coins");
 		stmt.close();
 	}
-	
+
 	public boolean saveCascade(Cascade zCascade) throws SQLException {
-			
+
 		//get the MiniData version..
 		MiniData cascdata = MiniData.getMiniDataVersion(zCascade);
-		
+
 		//Get the Query ready
 		SAVE_CASCADE.clearParameters();
-	
+
 		//Set main params
 		SAVE_CASCADE.setLong(1, zCascade.getTip().getTxPoW().getBlockNumber().getAsLong());
-		
+
 		//And finally the actual bytes
 		SAVE_CASCADE.setBytes(2, cascdata.getBytes());
-		
+
 		//Do it.
 		SAVE_CASCADE.execute();
-		
+
 		return true;
 	}
-	
-	
+
+
 	public Cascade loadCascade() throws SQLException {
-		
+
 		LOAD_CASCADE.clearParameters();
-		
+
 		ResultSet rs = LOAD_CASCADE.executeQuery();
-		
+
 		//Is there a valid result.. ?
 		if(rs.next()) {
-			
+
 			//Get the details..
 			byte[] syncdata 	= rs.getBytes("fulldata");
-			
+
 			//Create MiniData version
 			MiniData minisync = new MiniData(syncdata);
-			
+
 			//Convert
 			Cascade casc = Cascade.convertMiniDataVersion(minisync);
-			
+
 			return casc;
 		}
-		
+
 		return null;
 	}
-	
+
 	public synchronized boolean saveBlock(TxBlock zBlock) {
 		try {
-			
+
 			//get the MiniData version..
 			MiniData syncdata = MiniData.getMiniDataVersion(zBlock);
-			
+
 			//Get the Query ready
 			SQL_INSERT_SYNCBLOCK.clearParameters();
-		
+
 			//Set main params
 			SQL_INSERT_SYNCBLOCK.setString(1, zBlock.getTxPoW().getTxPoWID());
 			SQL_INSERT_SYNCBLOCK.setLong(2, zBlock.getTxPoW().getBlockNumber().getAsLong());
 			SQL_INSERT_SYNCBLOCK.setLong(3, System.currentTimeMillis());
-			
+
 			//And finally the actual bytes
 			SQL_INSERT_SYNCBLOCK.setBytes(4, syncdata.getBytes());
-			
+
 			//Do it.
 			SQL_INSERT_SYNCBLOCK.execute();
-			
+
 //			MinimaLogger.log("MYSQL stored synvblock "+zBlock.getTxPoW().getBlockNumber());
-			
+
 			// Save coins from a block
 
 			// Created coins
@@ -232,6 +232,9 @@ public class MySQLConnect {
 
 				//Do it.
 				SQL_INSERT_COINS.execute();
+
+				// Log it.
+				MinimaLogger.log(cc.toJSON());
 			}
 
 			// Spent coins
@@ -255,6 +258,9 @@ public class MySQLConnect {
 
 				//Do it.
 				SQL_INSERT_COINS.execute();
+
+				// Log it.
+				MinimaLogger.log(buffCoin.toJSON());
 			}
 
 			// Transactions in a block
@@ -280,247 +286,247 @@ public class MySQLConnect {
 			//MinimaLogger.log("Block "+zBlock.getTxPoW().getBlockNumber()+" have a body: "+zBody.toJSON());
 
 			return true;
-			
+
 		} catch (SQLException e) {
 			MinimaLogger.log(e);
 		}
-		
+
 		return false;
 	}
-	
+
 	public synchronized TxBlock loadBlockFromID(String zTxPoWID) {
-		
+
 		try {
-			
+
 			//Set search params
 			SQL_FIND_SYNCBLOCK_ID.clearParameters();
 			SQL_FIND_SYNCBLOCK_ID.setString(1, zTxPoWID);
-			
+
 			//Run the query
 			ResultSet rs = SQL_FIND_SYNCBLOCK_ID.executeQuery();
-			
+
 			//Is there a valid result.. ?
 			if(rs.next()) {
-				
+
 				//Get the details..
 				byte[] syncdata 	= rs.getBytes("syncdata");
-				
+
 				//Create MiniData version
 				MiniData minisync = new MiniData(syncdata);
-				
+
 				//Convert
 				TxBlock sb = TxBlock.convertMiniDataVersion(minisync);
-				
+
 				return sb;
 			}
-			
+
 		} catch (SQLException e) {
 			MinimaLogger.log(e);
 		}
-		
+
 		return null;
 	}
-	
+
 	public synchronized TxBlock loadBlockFromNum(long zBlocknumber) {
-		
+
 		try {
-			
+
 			//Set search params
 			SQL_FIND_SYNCBLOCK_NUM.clearParameters();
 			SQL_FIND_SYNCBLOCK_NUM.setLong(1, zBlocknumber);
-			
+
 			//Run the query
 			ResultSet rs = SQL_FIND_SYNCBLOCK_NUM.executeQuery();
-			
+
 			//Is there a valid result.. ?
 			if(rs.next()) {
-				
+
 				//Get the details..
 				byte[] syncdata 	= rs.getBytes("syncdata");
-				
+
 				//Create MiniData version
 				MiniData minisync = new MiniData(syncdata);
-				
+
 				//Convert
 				TxBlock sb = TxBlock.convertMiniDataVersion(minisync);
-				
+
 				return sb;
 			}
-			
+
 		} catch (SQLException e) {
 			MinimaLogger.log(e);
 		}
-		
+
 		return null;
 	}
 
 	public synchronized long loadFirstBlock() {
-		
+
 		try {
-			
+
 			//Set search params
 			SQL_SELECT_FIRST_BLOCK.clearParameters();
-			
+
 			//Run the query
 			ResultSet rs = SQL_SELECT_FIRST_BLOCK.executeQuery();
-			
+
 			//Is there a valid result.. ?
 			if(rs.next()) {
-				
+
 				//Get the block
 				long block = rs.getLong("block");
-				
+
 				return block;
 			}
-			
+
 		} catch (SQLException e) {
 			MinimaLogger.log(e);
 		}
-		
+
 		return -1;
 	}
-	
+
 	public synchronized long loadLastBlock() {
-		
+
 		try {
-			
+
 			//Set search params
 			SQL_SELECT_LAST_BLOCK.clearParameters();
-			
+
 			//Run the query
 			ResultSet rs = SQL_SELECT_LAST_BLOCK.executeQuery();
-			
+
 			//Is there a valid result.. ?
 			if(rs.next()) {
-				
+
 				//Get the block
 				long block = rs.getLong("block");
-				
+
 				return block;
 			}
-			
+
 		} catch (SQLException e) {
 			MinimaLogger.log(e);
 		}
-		
+
 		return -1;
 	}
-	
+
 	public synchronized ArrayList<TxBlock> loadBlockRange(MiniNumber zStartBlock) {
-		
+
 		ArrayList<TxBlock> blocks = new ArrayList<>();
-		
+
 		try {
-			
+
 			//Set Search params
 			SQL_SELECT_RANGE.clearParameters();
 			SQL_SELECT_RANGE.setLong(1,zStartBlock.getAsLong());
-			
+
 			//Run the query
 			ResultSet rs = SQL_SELECT_RANGE.executeQuery();
-			
+
 			//Multiple results
 			while(rs.next()) {
-				
+
 				//Get the details..
 				byte[] syncdata 	= rs.getBytes("syncdata");
-				
+
 				//Create MiniData version
 				MiniData minisync = new MiniData(syncdata);
-				
+
 				//Convert
 				TxBlock sb = TxBlock.convertMiniDataVersion(minisync);
-				
+
 				//Add to our list
 				blocks.add(sb);
 			}
-			
+
 		} catch (SQLException e) {
 			MinimaLogger.log(e);
 		}
-		
+
 		return blocks;
 	}
-	
+
 //	/**
 //	 * Non Synchronized version of LoadBlockRange
-//	 * @throws SQLException 
+//	 * @throws SQLException
 //	 */
 //	public ArrayList<TxBlock> loadBlockRangeNoSync(MiniNumber zStartBlock) throws SQLException {
-//		
+//
 //		ArrayList<TxBlock> blocks = new ArrayList<>();
-//		
+//
 //		//Set Search params
 //		SQL_SELECT_RANGE.clearParameters();
 //		SQL_SELECT_RANGE.setLong(1,zStartBlock.getAsLong());
-//		
+//
 //		//Run the query
 //		ResultSet rs = SQL_SELECT_RANGE.executeQuery();
-//		
+//
 //		//Multiple results
 //		while(rs.next()) {
-//			
+//
 //			//Get the details..
 //			byte[] syncdata 	= rs.getBytes("syncdata");
-//			
+//
 //			//Create MiniData version
 //			MiniData minisync = new MiniData(syncdata);
-//			
+//
 //			//Convert
 //			TxBlock sb = TxBlock.convertMiniDataVersion(minisync);
-//			
+//
 //			//Add to our list
 //			blocks.add(sb);
 //		}
-//		
+//
 //		return blocks;
 //	}
-	
+
 	public static void main(String[] zArgs) throws SQLException {
-		
+
 		//Load the required classes
 		try {
 			Class.forName("com.mysql.cj.jdbc.Driver");
 		} catch (ClassNotFoundException e1) {
 			e1.printStackTrace();
 		}
-		
+
 		MySQLConnect mysql = new MySQLConnect("localhost:3306", "mydatabase", "myuser", "myuser");
 		mysql.init();
-		
+
 		//Add some TxPoW..
 		TxPoW txp = new TxPoW();
 		txp.setBlockNumber(MiniNumber.ZERO);
 		txp.calculateTXPOWID();
 		TxBlock txblk = new TxBlock(txp);
-		
+
 		txp = new TxPoW();
 		txp.setBlockNumber(MiniNumber.ONE);
 		txp.calculateTXPOWID();
 		txblk = new TxBlock(txp);
-		
+
 		mysql.saveBlock(txblk);
-		
+
 		//Now search for the top block..
 		long firstblock = mysql.loadFirstBlock();
 		long lastblock 	= mysql.loadLastBlock();
-		
+
 		System.out.println("FIRST : "+firstblock);
 		System.out.println("LAST  : "+lastblock);
-		
+
 //		String txpid = "0x0003E914FBF1C04C9E1B52E37A171CA870E5310B33E50B9DFA9DF0C044A24150";
 //		TxBlock block = mysql.loadBlockFromID(txpid);
-		
+
 //		TxBlock block = mysql.loadBlockFromNum(3);
 //		MinimaLogger.log(block.getTxPoW().toJSON().toString());
-		
+
 		ArrayList<TxBlock> blocks = mysql.loadBlockRange(MiniNumber.ZERO);
 		MinimaLogger.log("FOUND : "+blocks.size());
 		for(TxBlock block : blocks) {
 			MinimaLogger.log(block.getTxPoW().getBlockNumber().toString());
 		}
-		
+
 		mysql.shutdown();
 	}
-	
+
 }
