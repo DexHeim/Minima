@@ -260,7 +260,7 @@ public class MySQLConnect {
 				SQL_INSERT_COINS.execute();
 
 				// Log it.
-				MinimaLogger.log(buffCoin.toJSON().toString());
+				MinimaLogger.log(incoin.toJSON().toString());
 			}
 
 			// Transactions in a block
