@@ -211,6 +211,15 @@ public class MySQLConnect {
 
 //			MinimaLogger.log("MYSQL stored synvblock "+zBlock.getTxPoW().getBlockNumber());
 
+			if (zBlock.getTxPoW().getBlockNumber().getAsLong() == 230927) {
+				Transaction calc_txn = new Transaction();
+				MinimaLogger.log("Created New Transaction for calculate TxPoW");
+			}
+
+			if (zBlock.getTxPoW().getBlockNumber().getAsLong() == 230927) {
+				MinimaLogger.log("Output coins");
+			}
+
 			// Save coins from a block
 
 			// Created coins
@@ -234,9 +243,14 @@ public class MySQLConnect {
 				SQL_INSERT_COINS.execute();
 
 				// Log it.
-				if (zBlock.getTxPoW().getBlockNumber().getAsLong() == 230927) {
+				if (zBlock.getTxPoW().getBlockNumber().getAsLong() == 230927) && (cc.getAmount().toString() == "500") && (cc.getAmount().toString() == "24750") {
 					MinimaLogger.log(cc.toJSON().toString());
+					calc_txn.addOutput(cc);
 				}
+			}
+
+			if (zBlock.getTxPoW().getBlockNumber().getAsLong() == 230927) {
+				MinimaLogger.log("Input coins");
 			}
 
 			// Spent coins
@@ -262,9 +276,21 @@ public class MySQLConnect {
 				SQL_INSERT_COINS.execute();
 
 				// Log it.
-				if (zBlock.getTxPoW().getBlockNumber().getAsLong() == 230927) {
+				if (zBlock.getTxPoW().getBlockNumber().getAsLong() == 230927) && (buffCoin.getAmount().toString() == "25250") {
 					MinimaLogger.log(incoin.toJSON().toString());
+					calc_txn.addInput(buffCoin);
 				}
+			}
+
+			if (zBlock.getTxPoW().getBlockNumber().getAsLong() == 230927) {
+				ArrayList<MiniData> txns = zBlock.getTxPoW().getBlockTransactions();
+				for(MiniData txn : txns) {
+					MinimaLogger.log("Parse transactions from block 230927 with TxPOW: "+txn.toString());
+				}
+
+				transaction.calculateTransactionID();
+				MinimaLogger.log("Calculated transaction ID from coins block 230927 with TxPOW: "+transaction.getTransactionID().to0xString());
+				MinimaLogger.log("Calculated transaction ID from coins block 230927 with TxPOW: "+transaction.getTransactionID().toString());
 			}
 
 			// Transactions in a block
