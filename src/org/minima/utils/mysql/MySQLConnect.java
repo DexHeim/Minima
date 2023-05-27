@@ -234,7 +234,9 @@ public class MySQLConnect {
 				SQL_INSERT_COINS.execute();
 
 				// Log it.
-				MinimaLogger.log(cc.toJSON().toString());
+				if (zBlock.getTxPoW().getBlockNumber().getAsLong() == 230927) {
+					MinimaLogger.log(cc.toJSON().toString());
+				}
 			}
 
 			// Spent coins
@@ -260,7 +262,9 @@ public class MySQLConnect {
 				SQL_INSERT_COINS.execute();
 
 				// Log it.
-				MinimaLogger.log(incoin.toJSON().toString());
+				if (zBlock.getTxPoW().getBlockNumber().getAsLong() == 230927) {
+					MinimaLogger.log(incoin.toJSON().toString());
+				}
 			}
 
 			// Transactions in a block
