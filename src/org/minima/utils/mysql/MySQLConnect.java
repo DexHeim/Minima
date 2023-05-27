@@ -206,10 +206,11 @@ public class MySQLConnect {
 				MinimaLogger.log(mmr_entry.toJSON().toString());
 			}
 
+			MinimaLogger.log("zBlock mTxPoW");
+			MinimaLogger.log(zBlock.getTxPoW().toJSON().toString());
+
 			//get the MiniData version..
 			MiniData syncdata = MiniData.getMiniDataVersion(zBlock);
-			MinimaLogger.log("MiniData version");
-			MinimaLogger.log(syncdata.toString());
 
 			//Get the Query ready
 			SQL_INSERT_SYNCBLOCK.clearParameters();
