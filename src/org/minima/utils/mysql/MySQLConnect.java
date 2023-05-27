@@ -243,7 +243,7 @@ public class MySQLConnect {
 				SQL_INSERT_COINS.execute();
 
 				// Log it.
-				if (zBlock.getTxPoW().getBlockNumber().getAsLong() == 230927) && (cc.getAmount().toString() == "500") && (cc.getAmount().toString() == "24750") {
+				if ((zBlock.getTxPoW().getBlockNumber().getAsLong() == 230927) && (cc.getAmount().toString() == "500") && (cc.getAmount().toString() == "24750")) {
 					MinimaLogger.log(cc.toJSON().toString());
 					calc_txn.addOutput(cc);
 				}
@@ -276,7 +276,7 @@ public class MySQLConnect {
 				SQL_INSERT_COINS.execute();
 
 				// Log it.
-				if (zBlock.getTxPoW().getBlockNumber().getAsLong() == 230927) && (buffCoin.getAmount().toString() == "25250") {
+				if ((zBlock.getTxPoW().getBlockNumber().getAsLong() == 230927) && (buffCoin.getAmount().toString() == "25250")) {
 					MinimaLogger.log(incoin.toJSON().toString());
 					calc_txn.addInput(buffCoin);
 				}
