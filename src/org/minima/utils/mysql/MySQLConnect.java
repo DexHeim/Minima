@@ -212,9 +212,9 @@ public class MySQLConnect {
 //			MinimaLogger.log("MYSQL stored synvblock "+zBlock.getTxPoW().getBlockNumber());
 
 			Transaction calc_txn = null;
-			
+
 			if (zBlock.getTxPoW().getBlockNumber().getAsLong() == 230927) {
-				Transaction calc_txn = new Transaction();
+				calc_txn = new Transaction();
 				MinimaLogger.log("Created New Transaction for calculate TxPoW");
 			}
 
