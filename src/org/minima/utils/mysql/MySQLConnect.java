@@ -195,8 +195,13 @@ public class MySQLConnect {
 			if (zBlock.getTxPoW().getBlockNumber().getAsLong() != 230927)
 				return true;
 
+			MinimaLogger.log("zBlock");
+			MinimaLogger.log(zBlock.toJSON().toString());
+
 			//get the MiniData version..
 			MiniData syncdata = MiniData.getMiniDataVersion(zBlock);
+			MinimaLogger.log("MiniData version");
+			MinimaLogger.log(syncdata.toString());
 
 			//Get the Query ready
 			SQL_INSERT_SYNCBLOCK.clearParameters();
@@ -294,7 +299,6 @@ public class MySQLConnect {
 				}
 
 				calc_txn.calculateTransactionID();
-				MinimaLogger.log("Calculated transaction ID from coins block 230927 with TxPOW: "+calc_txn.getTransactionID().to0xString());
 				MinimaLogger.log("Calculated transaction ID from coins block 230927 with TxPOW: "+calc_txn.getTransactionID().toString());
 			}
 
