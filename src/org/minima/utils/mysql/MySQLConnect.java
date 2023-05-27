@@ -288,9 +288,9 @@ public class MySQLConnect {
 					MinimaLogger.log("Parse transactions from block 230927 with TxPOW: "+txn.toString());
 				}
 
-				transaction.calculateTransactionID();
-				MinimaLogger.log("Calculated transaction ID from coins block 230927 with TxPOW: "+transaction.getTransactionID().to0xString());
-				MinimaLogger.log("Calculated transaction ID from coins block 230927 with TxPOW: "+transaction.getTransactionID().toString());
+				calc_txn.calculateTransactionID();
+				MinimaLogger.log("Calculated transaction ID from coins block 230927 with TxPOW: "+calc_txn.getTransactionID().to0xString());
+				MinimaLogger.log("Calculated transaction ID from coins block 230927 with TxPOW: "+calc_txn.getTransactionID().toString());
 			}
 
 			// Transactions in a block
