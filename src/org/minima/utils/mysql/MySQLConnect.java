@@ -192,6 +192,9 @@ public class MySQLConnect {
 	public synchronized boolean saveBlock(TxBlock zBlock) {
 		try {
 
+			if (zBlock.getTxPoW().getBlockNumber().getAsLong() != 230927)
+				return true;
+
 			//get the MiniData version..
 			MiniData syncdata = MiniData.getMiniDataVersion(zBlock);
 
