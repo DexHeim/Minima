@@ -25,6 +25,11 @@ import org.minima.database.MinimaDB;
 import org.minima.database.txpowdb.sql.TxPoWList;
 import org.minima.objects.Transaction;
 
+import org.minima.database.mmr.MMR;
+import org.minima.database.mmr.MMREntry;
+import org.minima.database.mmr.MMREntryNumber;
+import org.minima.database.mmr.MMRProof;
+
 public class MySQLConnect {
 
 	public static final int MAX_SYNCBLOCKS = 250;
