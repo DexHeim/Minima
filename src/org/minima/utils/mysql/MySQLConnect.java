@@ -329,6 +329,9 @@ public class MySQLConnect {
 				// Log it.
 				MinimaLogger.log(cc.toJSON().toString());
 
+				if (cc.getToken() != null)
+					continue;
+
 				// Update Transactions
 				if (calc_txns.size() > 0) {
 					MinimaLogger.log("Have transactions!"+(Integer.toString(calc_txns.size()).toString()));
@@ -385,6 +388,9 @@ public class MySQLConnect {
 
 				// Log it.
 				MinimaLogger.log(incoin.toJSON().toString());
+
+				if (buffCoin.getToken() != null)
+					continue;
 
 				// Update Transactions
 				if (calc_txns.size() > 0) {
