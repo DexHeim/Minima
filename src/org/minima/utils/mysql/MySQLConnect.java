@@ -141,10 +141,10 @@ public class MySQLConnect {
 		stmt.execute(txp_txn);
 
 		//Create some fast indexes and uniqie link txpowid-transactionid..
-		String txp_txn_index = "ALTER TABLE `txp_txn` ADD UNIQUE `txp_txn_index`(`txpowid`, `txnid`)";
+		//String txp_txn_index = "ALTER TABLE `txp_txn` ADD UNIQUE `txp_txn_uindex`(`txpowid`, `txnid`)";
 
 		//Run it..
-		stmt.execute(txp_txn_index);
+		//stmt.execute(txp_txn_index);
 
 		//Create (CALCULATED) Transactions IN/OUT
 		//This table - grouping coins in transactions
@@ -160,10 +160,10 @@ public class MySQLConnect {
 		stmt.execute(transactions);
 
 		//Create some fast indexes and uniqie link txpowid-transactionid..
-		String transactions_index = "ALTER TABLE `transactions` ADD UNIQUE `transactions_index`(`txnid`, `coinid`)";
+		//String transactions_index = "ALTER TABLE `transactions` ADD UNIQUE `transactions_uindex`(`txnid`, `coinid`)";
 
 		//Run it..
-		stmt.execute(transactions_index);
+		//stmt.execute(transactions_index);
 
 		//All done..
 		stmt.close();
@@ -200,7 +200,12 @@ public class MySQLConnect {
 
 	public void wipeAll() throws SQLException {
 		Statement stmt = mConnection.createStatement();
-		stmt.execute("DROP ALL OBJECTS");
+		stmt.execute("DROP TABLE syncblock");
+		stmt.execute("DROP TABLE cascadedata");
+		stmt.execute("DROP TABLE coins");
+		stmt.execute("DROP TABLE coin_proofs");
+		stmt.execute("DROP TABLE transactions");
+		stmt.execute("DROP TABLE txp_txn");
 
 		stmt.close();
 	}
