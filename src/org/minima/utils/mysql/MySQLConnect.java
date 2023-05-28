@@ -141,7 +141,7 @@ public class MySQLConnect {
 		stmt.execute(txp_txn);
 
 		//Create some fast indexes and uniqie link txpowid-transactionid..
-		String txp_txn_index = "ALTER TABLE `txp_txn` ADD UNIQUE `txp_txn_uindex`(`txpowid`, `txnid`)";
+		String txp_txn_index = "ALTER TABLE `txp_txn` ADD UNIQUE `txp_txn_index`(`txpowid`, `txnid`)";
 
 		//Run it..
 		stmt.execute(txp_txn_index);
@@ -160,7 +160,7 @@ public class MySQLConnect {
 		stmt.execute(transactions);
 
 		//Create some fast indexes and uniqie link txpowid-transactionid..
-		String transactions_index = "ALTER TABLE `transactions` ADD UNIQUE `transactions_uindex`(`txnid`, `coinid`)";
+		String transactions_index = "ALTER TABLE `transactions` ADD UNIQUE `transactions_index`(`txnid`, `coinid`)";
 
 		//Run it..
 		stmt.execute(transactions_index);
