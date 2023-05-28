@@ -141,7 +141,7 @@ public class MySQLConnect {
 		stmt.execute(txp_txn);
 
 		//Create some fast indexes and uniqie link txpowid-transactionid..
-		String txp_txn_uindex = "CREATE UNIQUE INDEX IF NOT EXISTS txn_txp_uindex ON txp_txn ( txpowid, transactionid )";
+		String txp_txn_uindex = "CREATE UNIQUE INDEX IF NOT EXISTS txp_txn_uindex ON txp_txn ( txpowid, txnid )";
 
 		//Run it..
 		stmt.execute(txp_txn_uindex);
@@ -203,6 +203,9 @@ public class MySQLConnect {
 		stmt.execute("DROP TABLE syncblock");
 		stmt.execute("DROP TABLE cascadedata");
 		stmt.execute("DROP TABLE coins");
+		stmt.execute("DROP TABLE coin_proofs");
+		stmt.execute("DROP TABLE transactions");
+		stmt.execute("DROP TABLE txp_txn");
 		stmt.close();
 	}
 
