@@ -55,7 +55,10 @@ public class MySQLConnect {
 	PreparedStatement SAVE_CASCADE				= null;
 	PreparedStatement LOAD_CASCADE				= null;
 
-	PreparedStatement SQL_INSERT_COINS = null;
+	PreparedStatement SQL_INSERT_COINS		= null;
+
+	PreparedStatement SQL_INSERT_TXP_TXN				= null;
+	PreparedStatement SQL_INSERT_TRANSACTION		= null;
 
 	public MySQLConnect(String zHost, String zDatabase, String zUsername, String zPassword) {
 		mMySQLHost 	= zHost;
@@ -111,6 +114,57 @@ public class MySQLConnect {
 
 		//Run it..
 		stmt.execute(coins);
+
+		//Create the coin proofs table
+		String coin_proofs = "CREATE TABLE IF NOT EXISTS `coin_proofs` ("
+						+ "  `id` INT NOT NULL AUTO_INCREMENT PRIMARY KEY,"
+						+ "  `coinid` varchar(80) NOT NULL UNIQUE,"
+						+ "  `blocktime` BIGINT NOT NULL,"
+						+ "  `left` varchar(80) NOT NULL,"
+						+ "  `data` varchar(80) NOT NULL,"
+						+ "  `value` varchar(80) NOT NULL,"
+						+ "  `prooflength` INT NOT NULL"
+						+ ")";
+
+		//Run it..
+		stmt.execute(coins);
+
+		//Create TxPoW ID link (CALCULATED) Transaction ID
+		String txp_txn = "CREATE TABLE IF NOT EXISTS `txp_txn` ("
+						+ "  `id` INT NOT NULL AUTO_INCREMENT PRIMARY KEY,"
+						+ "  `block` BIGINT NOT NULL,"
+						+ "  `txpowid` varchar(80) NOT NULL,"
+						+ "  `txnid` varchar(80) NOT NULL"
+						+ ")";
+
+		//Run it..
+		stmt.execute(txp_txn);
+
+		//Create some fast indexes and uniqie link txpowid-transactionid..
+		String txp_txn_uindex = "CREATE UNIQUE INDEX IF NOT EXISTS txn_txp_uindex ON `txp_txn` (`txpowid`, `transactionid`)";
+
+		//Run it..
+		stmt.execute(txp_txn_uindex);
+
+		//Create (CALCULATED) Transactions IN/OUT
+		//This table - grouping coins in transactions
+		String transactions = "CREATE TABLE IF NOT EXISTS `transactions` ("
+						+ "  `id` INT NOT NULL AUTO_INCREMENT PRIMARY KEY,"
+						+ "  `txnid` varchar(80) NOT NULL,"
+						+ "  `coinid` varchar(80) NOT NULL,"
+						//Type of Input(0)/Output(1)
+						+ "  `type` BIT NOT NULL"
+						+ ")";
+
+		//Run it..
+		stmt.execute(txn_txp);
+
+		//Create some fast indexes and uniqie link txpowid-transactionid..
+		String transactions_uindex = "CREATE UNIQUE INDEX IF NOT EXISTS transactions_uindex ON `transactions` (`txnid`, `coinid`)";
+
+		//Run it..
+		stmt.execute(transactions_uindex);
+
 		//All done..
 		stmt.close();
 
@@ -129,6 +183,9 @@ public class MySQLConnect {
 
 		String insert_coins 			= "INSERT INTO coins ( block, coinid, amount, address, miniaddress, tokenid, mmrentry, created ) VALUES ( ?, ? ,? ,? ,? ,? ,? ,? ) AS new ON DUPLICATE KEY UPDATE mmrentry = new.mmrentry, created = new.created, block_sended = new.block";
 		SQL_INSERT_COINS 	= mConnection.prepareStatement(insert_coins);
+
+		SQL_INSERT_TXP_TXN = mConnection.prepareStatement("INSERT INTO txp_txn ( block, txpowid, txnid ) VALUES ( ?, ?, ? )");
+		SQL_INSERT_TRANSACTION = mConnection.prepareStatement("INSERT INTO transactions ( txnid, coinid, type ) VALUES ( ?, ?, ? )");
 	}
 
 	public void shutdown() {
@@ -228,21 +285,16 @@ public class MySQLConnect {
 
 //			MinimaLogger.log("MYSQL stored synvblock "+zBlock.getTxPoW().getBlockNumber());
 
+			// Init Transactions for Calculate
 			Transaction calc_txn = null;
+			ArrayList<Transaction> calc_txns = new ArrayList<>();
+			// Log it.
+			MinimaLogger.log("Created New Transaction for calculate TxPoW");
 
-			if (zBlock.getTxPoW().getBlockNumber().getAsLong() == 230927) {
-				calc_txn = new Transaction();
-				MinimaLogger.log("Created New Transaction for calculate TxPoW");
-			}
+			MinimaLogger.log("Output coins");
 
-			if (zBlock.getTxPoW().getBlockNumber().getAsLong() == 230927) {
-				MinimaLogger.log("Output coins");
-			}
-
-			// Save coins from a block
-
-			// Created coins
-
+			boolean new_txn = true;
+			// Save Created coins from a block
 			//Set main params
 			ArrayList<Coin> outputs = zBlock.getOutputCoins();
 
@@ -262,18 +314,25 @@ public class MySQLConnect {
 				SQL_INSERT_COINS.execute();
 
 				// Log it.
-				if ((zBlock.getTxPoW().getBlockNumber().getAsLong() == 230927) && ((cc.getAmount().getAsLong() == 500) || (cc.getAmount().getAsLong() == 24750))) {
-					MinimaLogger.log(cc.toJSON().toString());
+				MinimaLogger.log(cc.toJSON().toString());
+
+				// Build Transactions
+				if (cc.storeState().isEqual(new_txn)) {
+					if (new_txn) {
+						new_txn = false;
+						calc_txn = new Transaction();
+					}
 					calc_txn.addOutput(cc);
+				} else {
+					calc_txns.add(calc_txn);
+					new_txn = true;
 				}
 			}
 
-			if (zBlock.getTxPoW().getBlockNumber().getAsLong() == 230927) {
-				MinimaLogger.log("Input coins");
-			}
+			MinimaLogger.log("Input coins");
+			MiniNumber txn_num = MiniNumber.ZERO;
 
-			// Spent coins
-
+			// Save Spent coins from a block
 			ArrayList<CoinProof> inputs = zBlock.getInputCoinProofs();
 			//Set main params
 			for(CoinProof incoin : inputs) {
@@ -295,20 +354,25 @@ public class MySQLConnect {
 				SQL_INSERT_COINS.execute();
 
 				// Log it.
-				if ((zBlock.getTxPoW().getBlockNumber().getAsLong() == 230927) && (buffCoin.getAmount().getAsLong() == 25250)) {
-					MinimaLogger.log(incoin.toJSON().toString());
-					calc_txn.addInput(buffCoin);
+				MinimaLogger.log(incoin.toJSON().toString());
+
+				// Update Transactions
+				calc_txn = calc_txns.get(txn_num.getAsLong());
+				if (calc_txn.sumInputs().add(buffCoin.getAmount()).isEqual(calc_txn.sumOutputs())) {
+					calc_txn.addInput(cc);
+					calc_txns.set(txn_num.getAsLong(), calc_txn);
+					txn_num = txn_num.increment();
+				} else if (calc_txn.sumInputs().add(buffCoin.getAmount()).isLess(calc_txn.sumOutputs())) {
+					calc_txn.addInput(cc);
+					calc_txns.set(txn_num.getAsLong(), calc_txn);
+				} else {
+					MinimaLogger.log("Incorrect transaction build! @" + zBlock.getTxPoW().getBlockNumber().toString());
 				}
 			}
 
-			if (zBlock.getTxPoW().getBlockNumber().getAsLong() == 230927) {
-				ArrayList<MiniData> txns = zBlock.getTxPoW().getBlockTransactions();
-				for(MiniData txn : txns) {
-					MinimaLogger.log("Parse transactions from block 230927 with TxPOW: "+txn.toString());
-				}
-
-				calc_txn.calculateTransactionID();
-				MinimaLogger.log("Calculated transaction ID from coins block 230927 with TxPOW: "+calc_txn.getTransactionID().toString());
+			for(Transaction txn : calc_txns) {
+				txn.calculateTransactionID();
+				MinimaLogger.log("Calculated transaction ID from coins block @"+zBlock.getTxPoW().getBlockNumber().toString()+": "+calc_txn.getTransactionID().to0xString());
 			}
 
 			// Transactions in a block
