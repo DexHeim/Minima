@@ -357,14 +357,14 @@ public class MySQLConnect {
 				MinimaLogger.log(incoin.toJSON().toString());
 
 				// Update Transactions
-				calc_txn = calc_txns.get(txn_num.getAsLong());
+				calc_txn = calc_txns.get(txn_num.getAsInt());
 				if (calc_txn.sumInputs().add(buffCoin.getAmount()).isEqual(calc_txn.sumOutputs())) {
 					calc_txn.addInput(cc);
-					calc_txns.set(txn_num.getAsLong(), calc_txn);
+					calc_txns.set(txn_num.getAsInt(), calc_txn);
 					txn_num = txn_num.increment();
 				} else if (calc_txn.sumInputs().add(buffCoin.getAmount()).isLess(calc_txn.sumOutputs())) {
 					calc_txn.addInput(cc);
-					calc_txns.set(txn_num.getAsLong(), calc_txn);
+					calc_txns.set(txn_num.getAsInt(), calc_txn);
 				} else {
 					MinimaLogger.log("Incorrect transaction build! @" + zBlock.getTxPoW().getBlockNumber().toString());
 				}
