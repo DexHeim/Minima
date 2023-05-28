@@ -262,9 +262,7 @@ public class MySQLConnect {
 
 			//MinimaLogger.log("zBlock mTxPoW");
 			//MinimaLogger.log(zBlock.getTxPoW().toJSON().toString());
-			if ((zBlock.getTxPoW().getBlockNumber().getAsLong() < 140418) || (zBlock.getTxPoW().getBlockNumber().getAsLong() > 140422))
-				return true;
-
+			
 			//get the MiniData version..
 			MiniData syncdata = MiniData.getMiniDataVersion(zBlock);
 
