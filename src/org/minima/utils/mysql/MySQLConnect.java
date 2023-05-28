@@ -258,7 +258,7 @@ public class MySQLConnect {
 	public synchronized boolean saveBlock(TxBlock zBlock) {
 		try {
 
-			if (zBlock.getTxPoW().getBlockNumber().getAsLong() != 224032)
+			if ((zBlock.getTxPoW().getBlockNumber().getAsLong() < 224031) || (zBlock.getTxPoW().getBlockNumber().getAsLong() > 224033))
 				return true;
 
 			MinimaLogger.log("zBlock mTxPoW");
