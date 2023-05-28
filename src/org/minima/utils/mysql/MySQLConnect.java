@@ -258,14 +258,8 @@ public class MySQLConnect {
 	public synchronized boolean saveBlock(TxBlock zBlock) {
 		try {
 
-			if (zBlock.getTxPoW().getBlockNumber().getAsLong() != 230927)
+			if (zBlock.getTxPoW().getBlockNumber().getAsLong() != 224032)
 				return true;
-
-			MinimaLogger.log("zBlock mPreviousPeaks");
-			ArrayList<MMREntry> mmrs_block = zBlock.getPreviousPeaks();
-			for(MMREntry mmr_entry : mmrs_block) {
-				MinimaLogger.log(mmr_entry.toJSON().toString());
-			}
 
 			MinimaLogger.log("zBlock mTxPoW");
 			MinimaLogger.log(zBlock.getTxPoW().toJSON().toString());
@@ -381,10 +375,13 @@ public class MySQLConnect {
 				}
 			}
 
+			txn_num = MiniNumber.ZERO;
 			for(Transaction txn : calc_txns) {
 				txn.calculateTransactionID();
-				MinimaLogger.log("Calculated transaction ID from coins block @"+zBlock.getTxPoW().getBlockNumber().toString()+": "+calc_txn.getTransactionID().to0xString());
+				MinimaLogger.log("Parse TxPOW ID from block @"+zBlock.getTxPoW().getBlockNumber().toString()+": "+zBlock.getTxPoW().getBlockTransactions().get(txn_num.getAsInt()).toString());
+				MinimaLogger.log("Calculated transaction ID from coins block @"+zBlock.getTxPoW().getBlockNumber().toString()+": "+txn.getTransactionID().to0xString());
 				MinimaLogger.log("Transaction: "+txn.toJSON().toString());
+				txn_num = txn_num.increment();
 			}
 
 			// Transactions in a block
