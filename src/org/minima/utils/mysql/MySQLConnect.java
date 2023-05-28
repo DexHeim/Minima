@@ -344,7 +344,6 @@ public class MySQLConnect {
 						}
 						calc_txn.addOutput(cc);
 						calc_txns.set(txn_num, calc_txn);
-						txn_num++;
 					} else {
 						calc_txn.addOutput(cc);
 						calc_txns.set(txn_num, calc_txn);
