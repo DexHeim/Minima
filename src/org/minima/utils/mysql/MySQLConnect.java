@@ -141,10 +141,10 @@ public class MySQLConnect {
 		stmt.execute(txp_txn);
 
 		//Create some fast indexes and uniqie link txpowid-transactionid..
-		//String txp_txn_index = "ALTER TABLE `txp_txn` ADD UNIQUE `txp_txn_uindex`(`txpowid`, `txnid`)";
+		String txp_txn_index = "ALTER TABLE `txp_txn` ADD UNIQUE `txp_txn_uindex`(`txpowid`, `txnid`)";
 
 		//Run it..
-		//stmt.execute(txp_txn_index);
+		stmt.execute(txp_txn_index);
 
 		//Create (CALCULATED) Transactions IN/OUT
 		//This table - grouping coins in transactions
@@ -152,7 +152,7 @@ public class MySQLConnect {
 						+ "  `id` INT NOT NULL AUTO_INCREMENT PRIMARY KEY,"
 						+ "  `txnid` varchar(80) NOT NULL,"
 						+ "  `coinid` varchar(80) NOT NULL,"
-						//Type of Input(0)/Output(1)
+						//Type of Input(0)/Output(1) coin
 						+ "  `type` BIT NOT NULL"
 						+ ")";
 
@@ -160,10 +160,10 @@ public class MySQLConnect {
 		stmt.execute(transactions);
 
 		//Create some fast indexes and uniqie link txpowid-transactionid..
-		//String transactions_index = "ALTER TABLE `transactions` ADD UNIQUE `transactions_uindex`(`txnid`, `coinid`)";
+		String transactions_index = "ALTER TABLE `transactions` ADD UNIQUE `transactions_uindex`(`txnid`, `coinid`)";
 
 		//Run it..
-		//stmt.execute(transactions_index);
+		stmt.execute(transactions_index);
 
 		//All done..
 		stmt.close();
@@ -287,9 +287,9 @@ public class MySQLConnect {
 			Transaction calc_txn = null;
 			ArrayList<Transaction> calc_txns = new ArrayList<>();
 			// Log it.
-			MinimaLogger.log("Created New Transaction for calculate TxPoW");
+			//MinimaLogger.log("Created New Transaction for calculate TxPoW");
 
-			MinimaLogger.log("Output coins");
+			//MinimaLogger.log("Output coins");
 
 			boolean new_txn = true;
 			// Save Created coins from a block
@@ -312,7 +312,7 @@ public class MySQLConnect {
 				SQL_INSERT_COINS.execute();
 
 				// Log it.
-				MinimaLogger.log(cc.toJSON().toString());
+				//MinimaLogger.log(cc.toJSON().toString());
 
 				// Build Transactions
 				if (cc.storeState() == new_txn) {
@@ -335,7 +335,7 @@ public class MySQLConnect {
 			if (outputs.size() > 0)
 				calc_txns.add(calc_txn);
 
-			MinimaLogger.log("Input coins");
+			//MinimaLogger.log("Input coins");
 			MiniNumber txn_num = MiniNumber.ZERO;
 
 			// Save Spent coins from a block
@@ -360,7 +360,7 @@ public class MySQLConnect {
 				SQL_INSERT_COINS.execute();
 
 				// Log it.
-				MinimaLogger.log(incoin.toJSON().toString());
+				//MinimaLogger.log(incoin.toJSON().toString());
 
 				// Update Transactions
 				calc_txn = calc_txns.get(txn_num.getAsInt());
@@ -376,34 +376,37 @@ public class MySQLConnect {
 				}
 			}
 
+			// Transactions in a block
 			txn_num = MiniNumber.ZERO;
 			for(Transaction txn : calc_txns) {
+				// Calculate Transaction ID before save link TxPoW ID - Transaction ID
 				txn.calculateTransactionID();
-				MinimaLogger.log("Parse TxPOW ID from block @"+zBlock.getTxPoW().getBlockNumber().toString()+": "+zBlock.getTxPoW().getBlockTransactions().get(txn_num.getAsInt()).toString());
-				MinimaLogger.log("Calculated transaction ID from coins block @"+zBlock.getTxPoW().getBlockNumber().toString()+": "+txn.getTransactionID().to0xString());
-				MinimaLogger.log("Transaction: "+txn.toJSON().toString());
+
+				// Prepare save link txp-txn
+				SQL_INSERT_TXP_TXN.setLong(1, zBlock.getTxPoW().getBlockNumber().getAsLong());
+				SQL_INSERT_TXP_TXN.setString(2, zBlock.getTxPoW().getBlockTransactions().get(txn_num.getAsInt()).toString());
+				SQL_INSERT_TXP_TXN.setString(3, txn.getTransactionID().to0xString());
+
+				//Do it.
+				SQL_INSERT_COINS.execute();
+
+				// Prepare save Transaction
+				// INSERT INTO transactions ( txnid, coinid, type ) VALUES ( ?, ?, ? )
+				// Input coins
+				for(Coin coin : txn.getAllInputs()) {
+					SQL_INSERT_TRANSACTION.setString(1, txn.getTransactionID().to0xString());
+					SQL_INSERT_TRANSACTION.setString(2, coin.getCoinID().to0xString());
+					SQL_INSERT_TRANSACTION.setString(3, "0");
+				}
+
+				for(Coin coin : txn.getAllOutputs()) {
+					SQL_INSERT_TRANSACTION.setString(1, txn.getTransactionID().to0xString());
+					SQL_INSERT_TRANSACTION.setString(2, coin.getCoinID().to0xString());
+					SQL_INSERT_TRANSACTION.setString(3, "1");
+				}
+
 				txn_num = txn_num.increment();
 			}
-
-			// Transactions in a block
-
-			//TxPoW zPoW = zBlock.getTxPoW();
-			//TxBody zBody = zPoW.getTxBody();
-
-			/*
-			ArrayList<MiniData> txns = zBlock.getTxPoW().getBlockTransactions();
-			ArrayList<String> stxns = new ArrayList<>();
-			for(MiniData txn : txns) {
-				stxns.add(txn.toString());
-				MinimaLogger.log("Parse transactions from block with TxPOW: "+txn.toString());
-			}
-
-			ArrayList<TxPoW> txps = MinimaDB.getDB().getTxPoWDB().getAllTxPoW(stxns);
-
-			for(TxPoW txp : txps) {
-				MinimaLogger.log("Parse transactions from block "+zBlock.getTxPoW().getBlockNumber()+": "+txp.getTransaction().toJSON());
-			}
-			*/
 
 			//MinimaLogger.log("Block "+zBlock.getTxPoW().getBlockNumber()+" have a body: "+zBody.toJSON());
 
