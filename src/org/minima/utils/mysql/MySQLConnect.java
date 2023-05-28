@@ -260,9 +260,6 @@ public class MySQLConnect {
 	public synchronized boolean saveBlock(TxBlock zBlock) {
 		try {
 
-			//if ((zBlock.getTxPoW().getBlockNumber().getAsLong() < 224031) || (zBlock.getTxPoW().getBlockNumber().getAsLong() > 224033))
-			//	return true;
-
 			MinimaLogger.log("zBlock mTxPoW");
 			MinimaLogger.log(zBlock.getTxPoW().toJSON().toString());
 
@@ -365,20 +362,21 @@ public class MySQLConnect {
 				//MinimaLogger.log(incoin.toJSON().toString());
 
 				// Update Transactions
-				if (calc_txns.size() > 0) {
-					calc_txn = calc_txns.get(txn_num.getAsInt());
-					if (calc_txn.sumInputs().add(buffCoin.getAmount()).isEqual(calc_txn.sumOutputs())) {
-						calc_txn.addInput(buffCoin);
-						calc_txns.set(txn_num.getAsInt(), calc_txn);
-						txn_num = txn_num.increment();
-					} else if (calc_txn.sumInputs().add(buffCoin.getAmount()).isLess(calc_txn.sumOutputs())) {
-						calc_txn.addInput(buffCoin);
-						calc_txns.set(txn_num.getAsInt(), calc_txn);
-					} else {
-						MinimaLogger.log("Incorrect transaction build! @" + zBlock.getTxPoW().getBlockNumber().toString());
-					}
+				calc_txn = calc_txns.get(txn_num.getAsInt());
+				if (calc_txn.sumInputs().add(buffCoin.getAmount()).isEqual(calc_txn.sumOutputs())) {
+					calc_txn.addInput(buffCoin);
+					calc_txns.set(txn_num.getAsInt(), calc_txn);
+					txn_num = txn_num.increment();
+				} else if (calc_txn.sumInputs().add(buffCoin.getAmount()).isLess(calc_txn.sumOutputs())) {
+					calc_txn.addInput(buffCoin);
+					calc_txns.set(txn_num.getAsInt(), calc_txn);
+				} else {
+					MinimaLogger.log("Incorrect transaction build! @" + zBlock.getTxPoW().getBlockNumber().toString());
 				}
 			}
+
+			if (zBlock.getTxPoW().getBlockNumber().getAsLong() == 1)
+				return true;
 
 			// Transactions in a block
 			txn_num = MiniNumber.ZERO;
