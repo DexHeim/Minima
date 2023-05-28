@@ -204,9 +204,9 @@ public class MySQLConnect {
 		stmt.execute("DROP TABLE cascadedata");
 		stmt.execute("DROP TABLE coins");
 		stmt.execute("DROP TABLE coin_proofs");
-		stmt.execute("DROP INDEX transactions_uindex ON transactions");
+		stmt.execute("DROP INDEX transactions_uindex ON archivedb.transactions");
 		stmt.execute("DROP TABLE transactions");
-		stmt.execute("DROP INDEX txp_txn_uindex ON txp_txn");
+		stmt.execute("DROP INDEX txp_txn_uindex ON archivedb.txp_txn");
 		stmt.execute("DROP TABLE txp_txn");
 
 		stmt.close();
