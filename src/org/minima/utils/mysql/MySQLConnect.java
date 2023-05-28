@@ -329,21 +329,25 @@ public class MySQLConnect {
 				MinimaLogger.log(cc.toJSON().toString());
 
 				// Update Transactions
-				if (calc_txns.size() > 0)
+				if (calc_txns.size() > 0) {
+					calc_txn = calc_txns.get(txn_num);
 					if (cc.storeState() == first_state) {
 						if ((!prev_state) && (!cc.storeState())) {
 							calc_txn.addOutput(cc);
+							calc_txns.set(txn_num, calc_txn);
 							txn_num++;
 							continue;
 						}
-						calc_txn = calc_txns.get(txn_num);
 						calc_txn.addOutput(cc);
 						calc_txns.set(txn_num, calc_txn);
+						txn_num++;
 					} else {
 						calc_txn.addOutput(cc);
+						calc_txns.set(txn_num, calc_txn);
 						if (cc.storeState() != prev_state)
 							txn_num++;
 					}
+				}
 
 				prev_state = cc.storeState();
 			}
