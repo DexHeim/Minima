@@ -288,7 +288,7 @@ public class MySQLConnect {
 			// Log it.
 			//MinimaLogger.log("Created New Transaction for calculate TxPoW");
 
-			//MinimaLogger.log("Output coins");
+			MinimaLogger.log("Output coins");
 
 			boolean new_txn = true;
 			// Save Created coins from a block
@@ -334,7 +334,7 @@ public class MySQLConnect {
 			if ((outputs.size() > 0) && (calc_txn != null))
 				calc_txns.add(calc_txn);
 
-			//MinimaLogger.log("Input coins");
+			MinimaLogger.log("Input coins");
 			MiniNumber txn_num = MiniNumber.ZERO;
 
 			// Save Spent coins from a block
