@@ -331,6 +331,7 @@ public class MySQLConnect {
 					calc_txns.add(calc_txn);
 					new_txn = cc.storeState();
 					if (new_txn) {
+						new_txn = false;
 						calc_txn = new Transaction();
 						calc_txn.addOutput(cc);
 					}
