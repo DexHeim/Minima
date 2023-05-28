@@ -200,12 +200,8 @@ public class MySQLConnect {
 
 	public void wipeAll() throws SQLException {
 		Statement stmt = mConnection.createStatement();
-		stmt.execute("DROP TABLE syncblock");
-		stmt.execute("DROP TABLE cascadedata");
-		stmt.execute("DROP TABLE coins");
-		stmt.execute("DROP TABLE coin_proofs");
-		stmt.execute("DROP TABLE transactions");
-		stmt.execute("DROP TABLE txp_txn");
+		stmt.execute("DROP ALL OBJECTS");
+
 		stmt.close();
 	}
 
