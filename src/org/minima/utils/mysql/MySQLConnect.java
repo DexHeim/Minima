@@ -127,7 +127,7 @@ public class MySQLConnect {
 						+ ")";
 
 		//Run it..
-		stmt.execute(coins);
+		stmt.execute(coin_proofs);
 
 		//Create TxPoW ID link (CALCULATED) Transaction ID
 		String txp_txn = "CREATE TABLE IF NOT EXISTS `txp_txn` ("
