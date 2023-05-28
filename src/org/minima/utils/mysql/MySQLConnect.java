@@ -326,11 +326,11 @@ public class MySQLConnect {
 				//Do it.
 				SQL_INSERT_COINS.execute();
 
-				// Log it.
-				MinimaLogger.log(cc.toJSON().toString());
-
 				if (cc.getToken() != null)
 					continue;
+
+				// Log it.
+				MinimaLogger.log(cc.toJSON().toString());
 
 				// Update Transactions
 				if (calc_txns.size() > 0) {
@@ -386,11 +386,11 @@ public class MySQLConnect {
 				//Do it.
 				SQL_INSERT_COINS.execute();
 
-				// Log it.
-				MinimaLogger.log(incoin.toJSON().toString());
-
 				if (buffCoin.getToken() != null)
 					continue;
+
+				// Log it.
+				MinimaLogger.log(incoin.toJSON().toString());
 
 				// Update Transactions
 				if (calc_txns.size() > 0) {
