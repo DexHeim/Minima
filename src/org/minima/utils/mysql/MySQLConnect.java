@@ -317,7 +317,7 @@ public class MySQLConnect {
 				MinimaLogger.log(cc.toJSON().toString());
 
 				// Build Transactions
-				if (cc.storeState() === new_txn) {
+				if (cc.storeState() == new_txn) {
 					if (new_txn) {
 						new_txn = false;
 						calc_txn = new Transaction();
