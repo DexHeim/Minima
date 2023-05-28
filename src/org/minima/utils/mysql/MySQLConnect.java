@@ -339,7 +339,8 @@ public class MySQLConnect {
 						if ((!prev_state) && (!cc.storeState())) {
 							calc_txn.addOutput(cc);
 							calc_txns.set(txn_num, calc_txn);
-							txn_num++;
+							if (txn_num < calc_txns.size()-1)
+								txn_num++;
 							continue;
 						}
 						calc_txn.addOutput(cc);
@@ -347,7 +348,7 @@ public class MySQLConnect {
 					} else {
 						calc_txn.addOutput(cc);
 						calc_txns.set(txn_num, calc_txn);
-						if (cc.storeState() != prev_state)
+						if ((cc.storeState() != prev_state) && (txn_num < calc_txns.size()-1))
 							txn_num++;
 					}
 				}
