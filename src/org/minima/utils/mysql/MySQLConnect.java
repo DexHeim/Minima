@@ -327,7 +327,7 @@ public class MySQLConnect {
 						new_txn = cc.storeState();
 						continue;
 					} else if (cc.storeState()) {
-						alc_txn.addOutput(cc);
+						calc_txn.addOutput(cc);
 						new_txn = cc.storeState();
 						continue;
 					}
