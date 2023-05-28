@@ -337,6 +337,8 @@ public class MySQLConnect {
 					}
 				}
 			}
+			// Add calc txn after last output coin in block
+			calc_txns.add(calc_txn);
 
 			MinimaLogger.log("Input coins");
 			MiniNumber txn_num = MiniNumber.ZERO;
