@@ -304,7 +304,6 @@ public class MySQLConnect {
 			if (zBlock.getOutputCoins().size() > 0) {
 				first_state = zBlock.getOutputCoins().get(0).storeState();
 				prev_state = !first_state;
-				txn_num = zBlock.getOutputCoins().size();
 			}
 			// Save Created coins from a block
 			//Set main params
