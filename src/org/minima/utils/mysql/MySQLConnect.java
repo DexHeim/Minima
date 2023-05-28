@@ -314,25 +314,20 @@ public class MySQLConnect {
 				//MinimaLogger.log(cc.toJSON().toString());
 
 				// Build Transactions
-				try {
-					if (cc.storeState() == new_txn) {
-						if (new_txn) {
-							new_txn = false;
-							calc_txn = new Transaction();
-						}
-						calc_txn.addOutput(cc);
-					} else {
-						calc_txns.add(calc_txn);
-						new_txn = cc.storeState();
-						if (new_txn) {
-							new_txn = false;
-							calc_txn = new Transaction();
-							calc_txn.addOutput(cc);
-						}
+				if (cc.storeState() == new_txn) {
+					if (new_txn) {
+						new_txn = false;
+						calc_txn = new Transaction();
 					}
-				} catch (SQLException e) {
-					MinimaLogger.log(e);
-					MinimaLogger.log(zBlock.getTxPoW().toJSON().toString());
+					calc_txn.addOutput(cc);
+				} else {
+					calc_txns.add(calc_txn);
+					new_txn = cc.storeState();
+					if (new_txn) {
+						new_txn = false;
+						calc_txn = new Transaction();
+						calc_txn.addOutput(cc);
+					}
 				}
 			}
 			// Add calc txn after last output coin in block
@@ -430,6 +425,8 @@ public class MySQLConnect {
 
 		} catch (SQLException e) {
 			MinimaLogger.log(e);
+			MinimaLogger.log(zBlock.toJSON().toString());
+			MinimaLogger.log(zBlock.getTxPoW().toJSON().toString());
 		}
 
 		return false;
