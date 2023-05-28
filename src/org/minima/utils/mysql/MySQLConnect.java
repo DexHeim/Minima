@@ -381,6 +381,7 @@ public class MySQLConnect {
 			for(Transaction txn : calc_txns) {
 				txn.calculateTransactionID();
 				MinimaLogger.log("Calculated transaction ID from coins block @"+zBlock.getTxPoW().getBlockNumber().toString()+": "+calc_txn.getTransactionID().to0xString());
+				MinimaLogger.log("Transaction: "+txn.toJSON().toString());
 			}
 
 			// Transactions in a block
