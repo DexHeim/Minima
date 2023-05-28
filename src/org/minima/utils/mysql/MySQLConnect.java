@@ -330,6 +330,11 @@ public class MySQLConnect {
 
 				// Update Transactions
 				if (calc_txns.size() > 0) {
+					MinimaLogger.log("Have transactions!"+calc_txns.size().toString());
+					MinimaLogger.log("Txn Num: "+txn_num.toString());
+					MinimaLogger.log("Store State: "+cc.storeState().toString());
+					MinimaLogger.log("Prev Store State: "+prev_state.toString());
+					MinimaLogger.log("First Store State: "+first_state.toString());
 					calc_txn = calc_txns.get(txn_num);
 					if (cc.storeState() == first_state) {
 						if ((!prev_state) && (!cc.storeState())) {
