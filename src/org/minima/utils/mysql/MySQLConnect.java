@@ -314,24 +314,29 @@ public class MySQLConnect {
 				//MinimaLogger.log(cc.toJSON().toString());
 
 				// Build Transactions
-				if (cc.storeState() == new_txn) {
-					if (new_txn) {
-						new_txn = false;
-						calc_txn = new Transaction();
-					}
-					calc_txn.addOutput(cc);
-				} else {
-					calc_txns.add(calc_txn);
-					new_txn = cc.storeState();
-					if (new_txn) {
-						new_txn = false;
-						calc_txn = new Transaction();
+				try {
+					if (cc.storeState() == new_txn) {
+						if (new_txn) {
+							new_txn = false;
+							calc_txn = new Transaction();
+						}
 						calc_txn.addOutput(cc);
+					} else {
+						calc_txns.add(calc_txn);
+						new_txn = cc.storeState();
+						if (new_txn) {
+							new_txn = false;
+							calc_txn = new Transaction();
+							calc_txn.addOutput(cc);
+						}
 					}
+				} catch (SQLException e) {
+					MinimaLogger.log(e);
+					MinimaLogger.log(zBlock.getTxPoW().toJSON().toString());
 				}
 			}
 			// Add calc txn after last output coin in block
-			if (outputs.size() > 0)
+			if ((outputs.size() > 0) && (calc_txn != null))
 				calc_txns.add(calc_txn);
 
 			//MinimaLogger.log("Input coins");
@@ -362,17 +367,19 @@ public class MySQLConnect {
 				//MinimaLogger.log(incoin.toJSON().toString());
 
 				// Update Transactions
-				calc_txn = calc_txns.get(txn_num.getAsInt());
-				if (calc_txn.sumInputs().add(buffCoin.getAmount()).isEqual(calc_txn.sumOutputs())) {
-					calc_txn.addInput(buffCoin);
-					calc_txns.set(txn_num.getAsInt(), calc_txn);
-					txn_num = txn_num.increment();
-				} else if (calc_txn.sumInputs().add(buffCoin.getAmount()).isLess(calc_txn.sumOutputs())) {
-					calc_txn.addInput(buffCoin);
-					calc_txns.set(txn_num.getAsInt(), calc_txn);
-				} else {
-					MinimaLogger.log("Incorrect transaction build! @" + zBlock.getTxPoW().getBlockNumber().toString());
-					MinimaLogger.log(zBlock.getTxPoW().toJSON().toString());
+				if (calc_txns.size() > 0) {
+					calc_txn = calc_txns.get(txn_num.getAsInt());
+					if (calc_txn.sumInputs().add(buffCoin.getAmount()).isEqual(calc_txn.sumOutputs())) {
+						calc_txn.addInput(buffCoin);
+						calc_txns.set(txn_num.getAsInt(), calc_txn);
+						txn_num = txn_num.increment();
+					} else if (calc_txn.sumInputs().add(buffCoin.getAmount()).isLess(calc_txn.sumOutputs())) {
+						calc_txn.addInput(buffCoin);
+						calc_txns.set(txn_num.getAsInt(), calc_txn);
+					} else {
+						MinimaLogger.log("Incorrect transaction build! @" + zBlock.getTxPoW().getBlockNumber().toString());
+						MinimaLogger.log(zBlock.getTxPoW().toJSON().toString());
+					}
 				}
 			}
 
