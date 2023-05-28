@@ -157,7 +157,7 @@ public class MySQLConnect {
 						+ ")";
 
 		//Run it..
-		stmt.execute(txn_txp);
+		stmt.execute(transactions);
 
 		//Create some fast indexes and uniqie link txpowid-transactionid..
 		String transactions_uindex = "CREATE UNIQUE INDEX IF NOT EXISTS transactions_uindex ON `transactions` (`txnid`, `coinid`)";
@@ -317,7 +317,7 @@ public class MySQLConnect {
 				MinimaLogger.log(cc.toJSON().toString());
 
 				// Build Transactions
-				if (cc.storeState().isEqual(new_txn)) {
+				if (cc.storeState() === new_txn) {
 					if (new_txn) {
 						new_txn = false;
 						calc_txn = new Transaction();
