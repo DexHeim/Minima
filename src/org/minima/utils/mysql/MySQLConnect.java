@@ -399,7 +399,7 @@ public class MySQLConnect {
 				for(Coin coin : txn.getAllInputs()) {
 					SQL_INSERT_TRANSACTION.setString(1, txn.getTransactionID().to0xString());
 					SQL_INSERT_TRANSACTION.setString(2, coin.getCoinID().to0xString());
-					SQL_INSERT_TRANSACTION.setString(3, "0");
+					SQL_INSERT_TRANSACTION.setBoolean(3, false);
 
 					//Do it.
 					SQL_INSERT_TRANSACTION.execute();
@@ -408,7 +408,7 @@ public class MySQLConnect {
 				for(Coin coin : txn.getAllOutputs()) {
 					SQL_INSERT_TRANSACTION.setString(1, txn.getTransactionID().to0xString());
 					SQL_INSERT_TRANSACTION.setString(2, coin.getCoinID().to0xString());
-					SQL_INSERT_TRANSACTION.setString(3, "1");
+					SQL_INSERT_TRANSACTION.setBoolean(3, true);
 
 					//Do it.
 					SQL_INSERT_TRANSACTION.execute();
