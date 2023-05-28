@@ -260,8 +260,8 @@ public class MySQLConnect {
 	public synchronized boolean saveBlock(TxBlock zBlock) {
 		try {
 
-			MinimaLogger.log("zBlock mTxPoW");
-			MinimaLogger.log(zBlock.getTxPoW().toJSON().toString());
+			//MinimaLogger.log("zBlock mTxPoW");
+			//MinimaLogger.log(zBlock.getTxPoW().toJSON().toString());
 
 			//get the MiniData version..
 			MiniData syncdata = MiniData.getMiniDataVersion(zBlock);
@@ -372,6 +372,7 @@ public class MySQLConnect {
 					calc_txns.set(txn_num.getAsInt(), calc_txn);
 				} else {
 					MinimaLogger.log("Incorrect transaction build! @" + zBlock.getTxPoW().getBlockNumber().toString());
+					MinimaLogger.log(zBlock.getTxPoW().toJSON().toString());
 				}
 			}
 
