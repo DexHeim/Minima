@@ -424,8 +424,8 @@ public class MySQLConnect {
 			return true;
 
 		} catch (SQLException e) {
-			MinimaLogger.log(e);
 			MinimaLogger.log(zBlock.getTxPoW().toJSON().toString());
+			MinimaLogger.log(e);
 		}
 
 		return false;
