@@ -258,8 +258,8 @@ public class MySQLConnect {
 	public synchronized boolean saveBlock(TxBlock zBlock) {
 		try {
 
-			if ((zBlock.getTxPoW().getBlockNumber().getAsLong() < 224031) || (zBlock.getTxPoW().getBlockNumber().getAsLong() > 224033))
-				return true;
+			//if ((zBlock.getTxPoW().getBlockNumber().getAsLong() < 224031) || (zBlock.getTxPoW().getBlockNumber().getAsLong() > 224033))
+			//	return true;
 
 			MinimaLogger.log("zBlock mTxPoW");
 			MinimaLogger.log(zBlock.getTxPoW().toJSON().toString());
@@ -388,7 +388,7 @@ public class MySQLConnect {
 				SQL_INSERT_TXP_TXN.setString(3, txn.getTransactionID().to0xString());
 
 				//Do it.
-				SQL_INSERT_COINS.execute();
+				SQL_INSERT_TXP_TXN.execute();
 
 				// Prepare save Transaction
 				// INSERT INTO transactions ( txnid, coinid, type ) VALUES ( ?, ?, ? )
@@ -397,12 +397,18 @@ public class MySQLConnect {
 					SQL_INSERT_TRANSACTION.setString(1, txn.getTransactionID().to0xString());
 					SQL_INSERT_TRANSACTION.setString(2, coin.getCoinID().to0xString());
 					SQL_INSERT_TRANSACTION.setString(3, "0");
+
+					//Do it.
+					SQL_INSERT_TRANSACTION.execute();
 				}
 
 				for(Coin coin : txn.getAllOutputs()) {
 					SQL_INSERT_TRANSACTION.setString(1, txn.getTransactionID().to0xString());
 					SQL_INSERT_TRANSACTION.setString(2, coin.getCoinID().to0xString());
 					SQL_INSERT_TRANSACTION.setString(3, "1");
+
+					//Do it.
+					SQL_INSERT_TRANSACTION.execute();
 				}
 
 				txn_num = txn_num.increment();
