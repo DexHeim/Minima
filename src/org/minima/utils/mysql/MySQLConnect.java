@@ -137,9 +137,8 @@ public class MySQLConnect {
 						+ "  `txpowid` varchar(80) NOT NULL,"
 						+ "  `txpowid_txn` varchar(80) NOT NULL,"
 						+ "  PRIMARY KEY(`id`),"
-						+ "  INDEX (`txpowid`, `coinid`),"
-						+ "  INDEX (`txpowid`, `coinid`),"
-						+ "  INDEX (`txpowid`, `coinid`),"
+						+ "  INDEX (`txpowid`),"
+						+ "  INDEX (`txpowid_txn`),"
 						+ "  CONSTRAINT `uidx_txpowidlist_txpowid_txpowid_txn` UNIQUE(`txpowid`, `txpowid_txn`)"
 						+ ")";
 
