@@ -420,11 +420,11 @@ public class MySQLConnect {
 						}
 
 						//if (jsonname) {
-							SQL_INSERT_TOKEN.setString(3, jsonname.get("name"));
-							SQL_INSERT_TOKEN.setString(4, jsonname.get("description"));
-							SQL_INSERT_TOKEN.setString(5, jsonname.get("url"));
-							SQL_INSERT_TOKEN.setString(6, jsonname.get("ticker"));
-							SQL_INSERT_TOKEN.setString(7, jsonname.get("webvalidate"));
+							SQL_INSERT_TOKEN.setString(3, jsonname.get("name").toString());
+							SQL_INSERT_TOKEN.setString(4, jsonname.get("description").toString());
+							SQL_INSERT_TOKEN.setString(5, jsonname.get("url").toString());
+							SQL_INSERT_TOKEN.setString(6, jsonname.get("ticker").toString());
+							SQL_INSERT_TOKEN.setString(7, jsonname.get("webvalidate").toString());
 						/*} else {
 							SQL_INSERT_TOKEN.setString(3, null);
 							SQL_INSERT_TOKEN.setString(4, null);
