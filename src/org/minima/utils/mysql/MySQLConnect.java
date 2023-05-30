@@ -307,6 +307,9 @@ public class MySQLConnect {
 
 				//Do it.
 				SQL_INSERT_COINS.execute();
+
+				if (cc.getToken() != null)
+					MinimaLogger.log(cc.toJSON());
 			}
 
 			// Spent coins
@@ -330,27 +333,10 @@ public class MySQLConnect {
 
 				//Do it.
 				SQL_INSERT_COINS.execute();
+
+				if (buffCoin.getToken() != null)
+					MinimaLogger.log(buffCoin.toJSON());
 			}
-
-			// Transactions in a block
-
-			//TxPoW zPoW = zBlock.getTxPoW();
-			//TxBody zBody = zPoW.getTxBody();
-
-			/*
-			ArrayList<MiniData> txns = zBlock.getTxPoW().getBlockTransactions();
-			ArrayList<String> stxns = new ArrayList<>();
-			for(MiniData txn : txns) {
-				stxns.add(txn.toString());
-				MinimaLogger.log("Parse transactions from block with TxPOW: "+txn.toString());
-			}
-
-			ArrayList<TxPoW> txps = MinimaDB.getDB().getTxPoWDB().getAllTxPoW(stxns);
-
-			for(TxPoW txp : txps) {
-				MinimaLogger.log("Parse transactions from block "+zBlock.getTxPoW().getBlockNumber()+": "+txp.getTransaction().toJSON());
-			}
-			*/
 
 			//MinimaLogger.log("Block "+zBlock.getTxPoW().getBlockNumber()+" have a body: "+zBody.toJSON());
 
