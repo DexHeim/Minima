@@ -217,8 +217,8 @@ public class MySQLConnect {
 		String insert_txheader = "INSERT INTO txheader ( txpowid, chainid, block, blkdiff, mmr, total, txbodyhash, nonce, timemilli ) VALUES ( ?, ?, ?, ?, ?, ?, ?, ?, ? )";
 		SQL_INSERT_TXHEADER 	= mConnection.prepareStatement(insert_txheader);
 
-		SQL_INSERT_TXPOWIDLIST 	= mConnection.prepareStatement("INSERT INTO txheader ( txpowid, txpowid_txn ) VALUES ( ?, ? )");
-		SQL_INSERT_TXPOWCOIN 	= mConnection.prepareStatement("INSERT INTO txheader ( txpowid, coinid ) VALUES ( ?, ? )");
+		SQL_INSERT_TXPOWIDLIST 	= mConnection.prepareStatement("INSERT INTO txpowidlist ( txpowid, txpowid_txn ) VALUES ( ?, ? )");
+		SQL_INSERT_TXPOWCOIN 	= mConnection.prepareStatement("INSERT INTO txpow_coin ( txpowid, coinid ) VALUES ( ?, ? )");
 
 		String insert_coin = "INSERT INTO coins ( coinid, amount, address, miniaddress, tokenid, mmrentry, created ) VALUES ( ?, ?, ?, ?, ?, ?, ? ) AS new ON DUPLICATE KEY UPDATE mmrentry = new.mmrentry, created = new.created";
 		SQL_INSERT_COIN 	= mConnection.prepareStatement(insert_coin);
