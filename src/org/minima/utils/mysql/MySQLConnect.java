@@ -19,7 +19,14 @@ import org.minima.utils.MinimaLogger;
 import org.minima.utils.Streamable;
 import org.minima.objects.Coin;
 import org.minima.objects.CoinProof;
+import org.minima.objects.Token;
 import org.minima.objects.Address;
+import org.minima.objects.TxPoW;
+
+import org.minima.utils.json.JSONArray;
+import org.minima.utils.json.JSONObject;
+import org.minima.utils.json.parser.JSONParser;
+import org.minima.utils.json.parser.ParseException;
 
 public class MySQLConnect {
 
@@ -46,7 +53,12 @@ public class MySQLConnect {
 	PreparedStatement SAVE_CASCADE				= null;
 	PreparedStatement LOAD_CASCADE				= null;
 
-	PreparedStatement SQL_INSERT_COINS = null;
+	PreparedStatement SQL_INSERT_TXPOW				= null;
+	PreparedStatement SQL_INSERT_TXHEADER			= null;
+	PreparedStatement SQL_INSERT_TXPOWIDLIST	= null;
+	PreparedStatement SQL_INSERT_TXPOWCOIN		= null;
+	PreparedStatement SQL_INSERT_COIN					= null;
+	PreparedStatement SQL_INSERT_TOKEN				= null;
 
 	public MySQLConnect(String zHost, String zDatabase, String zUsername, String zPassword) {
 		mMySQLHost 	= zHost;
@@ -87,7 +99,7 @@ public class MySQLConnect {
 
 		//Create the TxPoW table (TxPoW model from TxBlock-TxPoW)
 		String tbl_txpow = "CREATE TABLE IF NOT EXISTS `txpow` ("
-						+ "  `id` INT NOT NULL AUTO_INCREMENT,"
+						+ "  `id` int NOT NULL AUTO_INCREMENT,"
 						+ "  `txpowid` varchar(80) NOT NULL,"
 						+ "  `superblock` int NOT NULL,"
 						+ "  `size` bigint NOT NULL,"
@@ -101,13 +113,13 @@ public class MySQLConnect {
 
 		//Create the TxHeader table (TxHeader model from TxBlock-TxPoW-TxHeader)
 		String tbl_txheader = "CREATE TABLE IF NOT EXISTS `txheader` ("
-						+ "  `id` INT NOT NULL AUTO_INCREMENT,"
+						+ "  `id` int NOT NULL AUTO_INCREMENT,"
 						+ "  `txpowid` varchar(80) NOT NULL,"
 						+ "  `chainid` varchar(20) NOT NULL,"
 						+ "  `block` bigint NOT NULL,"
 						+ "  `blkdiff` varchar(80) NOT NULL,"
-						+ "  `cascadelevels` int NOT NULL,"
 						+ "  `mmr` varchar(80) NOT NULL,"
+						+ "  `total` varchar(80) NOT NULL,"
 						+ "  `txbodyhash` varchar(80) NOT NULL,"
 						+ "  `nonce` varchar(80) NOT NULL,"
 						+ "  `timemilli` bigint NOT NULL,"
@@ -120,7 +132,7 @@ public class MySQLConnect {
 
 		//Create the TxPoW ID list (Transactions TxPoW ID list from TxBlock-TxPoW-TxBody-TxPowIDList)
 		String tbl_txpowidlist = "CREATE TABLE IF NOT EXISTS `txpowidlist` ("
-						+ "  `id` INT NOT NULL AUTO_INCREMENT,"
+						+ "  `id` int NOT NULL AUTO_INCREMENT,"
 						+ "  `txpowid` varchar(80) NOT NULL,"
 						+ "  `txpowid_txn` varchar(80) NOT NULL,"
 						+ "  PRIMARY KEY(`id`),"
@@ -132,7 +144,7 @@ public class MySQLConnect {
 
 		//Create the TxPoW-Coin link
 		String tbl_txpow_coin = "CREATE TABLE IF NOT EXISTS `txpow_coin` ("
-						+ "  `id` INT NOT NULL AUTO_INCREMENT,"
+						+ "  `id` int NOT NULL AUTO_INCREMENT,"
 						+ "  `txpowid` varchar(80) NOT NULL,"
 						+ "  `coinid` varchar(80) NOT NULL,"
 						+ "  PRIMARY KEY(`id`),"
@@ -144,14 +156,14 @@ public class MySQLConnect {
 
 		//Create the coins table
 		String coins = "CREATE TABLE IF NOT EXISTS `coins` ("
-						+ "  `id` INT NOT NULL AUTO_INCREMENT,"
+						+ "  `id` int NOT NULL AUTO_INCREMENT,"
 						+ "  `coinid` varchar(80) NOT NULL,"
-						+ "  `amount` varchar(80) NULL,"
+						+ "  `amount` varchar(60) NOT NULL,"
 						+ "  `address` varchar(80) NOT NULL,"
 						+ "  `miniaddress` varchar(80) NOT NULL,"
 						+ "  `tokenid` varchar(80) NOT NULL,"
-						+ "  `mmrentry` varchar(20) NOT NULL,"
-						+ "  `created` varchar(20) NOT NULL,"
+						+ "  `mmrentry` bigint NOT NULL,"
+						+ "  `created` bigint NOT NULL,"
 						+ "  PRIMARY KEY (`id`),"
 						+ "  CONSTRAINT `idx_coins_coinid` UNIQUE(`coinid`)"
 						+ ")";
@@ -161,16 +173,23 @@ public class MySQLConnect {
 
 		//Create the tokens table
 		String tokens = "CREATE TABLE IF NOT EXISTS `tokens` ("
-						+ "  `id` INT NOT NULL AUTO_INCREMENT,"
-						+ "  `coinid` varchar(80) NOT NULL,"
-						+ "  `amount` varchar(80) NULL,"
-						+ "  `address` varchar(80) NOT NULL,"
-						+ "  `miniaddress` varchar(80) NOT NULL,"
+						+ "  `id` int NOT NULL AUTO_INCREMENT,"
 						+ "  `tokenid` varchar(80) NOT NULL,"
-						+ "  `mmrentry` varchar(20) NOT NULL,"
-						+ "  `created` varchar(20) NOT NULL,"
+						+ "  `coinid` varchar(80) NOT NULL,"
+						+ "  `name` varchar(1000) NULL,"
+						+ "  `description` varchar(10000) NULL,"
+						+ "  `url` text NULL,"
+						+ "  `ticker` varchar(80) NULL,"
+						+ "  `webvalidate` varchar(80) NULL,"
+						+ "  `object` text NULL,"
+						+ "  `total` bigint NOT NULL,"
+						+ "  `totalamount` varchar(60) NOT NULL,"
+						+ "  `decimals` int NOT NULL,"
+						+ "  `scale` int NOT NULL,"
+						+ "  `script` text NOT NULL,"
+						+ "  `created` bigint NOT NULL,"
 						+ "  PRIMARY KEY (`id`),"
-						+ "  CONSTRAINT `idx_coins_coinid` UNIQUE(`coinid`)"
+						+ "  CONSTRAINT `idx_tokens_tokenid` UNIQUE(`tokenid`)"
 						+ ")";
 
 		//Run it..
@@ -192,8 +211,20 @@ public class MySQLConnect {
 		SAVE_CASCADE = mConnection.prepareStatement("INSERT INTO cascadedata ( cascadetip, fulldata ) VALUES ( ?, ? )");
 		LOAD_CASCADE = mConnection.prepareStatement("SELECT fulldata FROM cascadedata ORDER BY cascadetip ASC LIMIT 1");
 
-		String insert_coins 			= "INSERT INTO coins ( block, coinid, amount, address, miniaddress, tokenid, mmrentry, created ) VALUES ( ?, ? ,? ,? ,? ,? ,? ,? ) AS new ON DUPLICATE KEY UPDATE mmrentry = new.mmrentry, created = new.created, block_sended = new.block";
-		SQL_INSERT_COINS 	= mConnection.prepareStatement(insert_coins);
+		String insert_txpow = "INSERT INTO txpow ( txpowid, superblock, size, burn ) VALUES ( ?, ?, ?, ? )";
+		SQL_INSERT_TXPOW 	= mConnection.prepareStatement(insert_txpow);
+
+		String insert_txheader = "INSERT INTO txheader ( txpowid, chainid, block, blkdiff, mmr, total, txbodyhash, nonce, timemilli ) VALUES ( ?, ?, ?, ?, ?, ?, ?, ?, ? )";
+		SQL_INSERT_TXHEADER 	= mConnection.prepareStatement(insert_txheader);
+
+		SQL_INSERT_TXPOWIDLIST 	= mConnection.prepareStatement("INSERT INTO txheader ( txpowid, txpowid_txn ) VALUES ( ?, ? )");
+		SQL_INSERT_TXPOWCOIN 	= mConnection.prepareStatement("INSERT INTO txheader ( txpowid, coinid ) VALUES ( ?, ? )");
+
+		String insert_coin = "INSERT INTO coins ( coinid, amount, address, miniaddress, tokenid, mmrentry, created ) VALUES ( ?, ?, ?, ?, ?, ?, ? ) AS new ON DUPLICATE KEY UPDATE mmrentry = new.mmrentry, created = new.created";
+		SQL_INSERT_COIN 	= mConnection.prepareStatement(insert_coin);
+
+		String insert_token = "INSERT INTO tokens ( tokenid, coinid, name, description, url, ticker, webvalidate, object, total, totalamount, decimals, scale, script, created ) VALUES ( ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ? )";
+		SQL_INSERT_TOKEN 	= mConnection.prepareStatement(insert_token);
 	}
 
 	public void shutdown() {
@@ -286,32 +317,67 @@ public class MySQLConnect {
 
 //			MinimaLogger.log("MYSQL stored synvblock "+zBlock.getTxPoW().getBlockNumber());
 
+			// Buffer TxPoW
+			TxPoW blockTxPoW = zBlock.getTxPoW();
+
+			// Store TxPoW
+			SQL_INSERT_TXPOW.setString(1, blockTxPoW.getTxPoWID().to0xString());
+			SQL_INSERT_TXPOW.setInt(2, blockTxPoW.getSuperLevel().getAsInt());
+			SQL_INSERT_TXPOW.setLong(3, blockTxPoW.getSizeinBytes().getAsLong());
+			SQL_INSERT_TXPOW.setInt(4, blockTxPoW.getBurn().getAsInt());
+
+			//Do it.
+			SQL_INSERT_TXPOW.execute();
+
+			// Store TxPoW TxHeader
+			SQL_INSERT_TXHEADER.setString(1, blockTxPoW.getTxPoWID().to0xString());
+			SQL_INSERT_TXHEADER.setString(2, blockTxPoW.getChainID().to0xString());
+			SQL_INSERT_TXHEADER.setLong(3, blockTxPoW.getBlockNumber().toString());
+			SQL_INSERT_TXHEADER.setString(4, blockTxPoW.getBlockDifficulty().to0xString());
+			SQL_INSERT_TXHEADER.setString(5, blockTxPoW.getMMRRoot().to0xString());
+			SQL_INSERT_TXHEADER.setString(6, blockTxPoW.getMMRTotal().to0xString());
+			SQL_INSERT_TXHEADER.setString(7, blockTxPoW.getTxHeader().getBodyHash().to0xString());
+			SQL_INSERT_TXHEADER.setString(8, blockTxPoW.getNonce().toString());
+			SQL_INSERT_TXHEADER.setLong(9, blockTxPoW.setTimeMilli().getAsLong());
+
+			//Do it.
+			SQL_INSERT_TXHEADER.execute();
+
+			// Store TxPoW ID List (Transactions)
+			for (MiniData txpow_id : zBlock.getTxPoW().getBlockTransactions()) {
+				SQL_INSERT_TXPOWIDLIST.setString(1, blockTxPoW.getTxPoWID().to0xString());
+				SQL_INSERT_TXPOWIDLIST.setString(2, txpow_id.to0xString());
+
+				//Do it.
+				SQL_INSERT_TXPOWIDLIST.execute();
+			}
+
 			// Save coins from a block
-
 			// Created coins
-
-			//Set main params
+			// Set main params
 			ArrayList<Coin> outputs = zBlock.getOutputCoins();
 
 			for(Coin cc : outputs) {
 				SQL_INSERT_COINS.clearParameters();
 
-				SQL_INSERT_COINS.setLong(1, zBlock.getTxPoW().getBlockNumber().getAsLong());
+				SQL_INSERT_COINS.setLong(1, blockTxPoW.getBlockNumber().getAsLong());
 				SQL_INSERT_COINS.setString(2, cc.getCoinID().to0xString());
 				SQL_INSERT_COINS.setString(3, cc.getAmount().toString());
 				SQL_INSERT_COINS.setString(4, cc.getAddress().to0xString());
 				SQL_INSERT_COINS.setString(5, Address.makeMinimaAddress(cc.getAddress()));
 				SQL_INSERT_COINS.setString(6, cc.getTokenID().to0xString());
-				SQL_INSERT_COINS.setString(7, cc.getMMREntryNumber().toString());
-				SQL_INSERT_COINS.setString(8, cc.getBlockCreated().toString());
+				SQL_INSERT_COINS.setLong(7, cc.getMMREntryNumber().getAsLong());
+				SQL_INSERT_COINS.setLong(8, cc.getBlockCreated().getAsLong());
 
 				//Do it.
 				SQL_INSERT_COINS.execute();
 
-				if (cc.getToken() != null) {
-					MinimaLogger.log("Output");
-					MinimaLogger.log(cc.toJSON().toString());
-				}
+				//Store link TxPoW-Coin
+				SQL_INSERT_TXPOWCOIN.setString(1, blockTxPoW.getTxPoWID().to0xString());
+				SQL_INSERT_TXPOWCOIN.setString(2, cc.getCoinID().to0xString());
+
+				//Do it.
+				SQL_INSERT_TXPOWCOIN.execute();
 			}
 
 			// Spent coins
@@ -324,21 +390,63 @@ public class MySQLConnect {
 
 				Coin buffCoin = incoin.getCoin();
 
-				SQL_INSERT_COINS.setLong(1, zBlock.getTxPoW().getBlockNumber().getAsLong());
+				SQL_INSERT_COINS.setLong(1, blockTxPoW.getBlockNumber().getAsLong());
 				SQL_INSERT_COINS.setString(2, buffCoin.getCoinID().to0xString());
 				SQL_INSERT_COINS.setString(3, buffCoin.getAmount().toString());
 				SQL_INSERT_COINS.setString(4, buffCoin.getAddress().to0xString());
 				SQL_INSERT_COINS.setString(5, Address.makeMinimaAddress(buffCoin.getAddress()));
 				SQL_INSERT_COINS.setString(6, buffCoin.getTokenID().to0xString());
-				SQL_INSERT_COINS.setString(7, buffCoin.getMMREntryNumber().toString());
-				SQL_INSERT_COINS.setString(8, buffCoin.getBlockCreated().toString());
+				SQL_INSERT_COINS.setLong(7, buffCoin.getMMREntryNumber().getAsLong());
+				SQL_INSERT_COINS.setLong(8, buffCoin.getBlockCreated().getAsLong());
 
 				//Do it.
 				SQL_INSERT_COINS.execute();
 
+				//Is coin have token
 				if (buffCoin.getToken() != null) {
-					MinimaLogger.log("Input");
-					MinimaLogger.log(incoin.toJSON().toString());
+					Token buffToken = buffCoin.getToken();
+
+					SQL_INSERT_TOKEN.setString(1, buffToken.getTokenID().to0xString());
+					SQL_INSERT_TOKEN.setString(2, buffToken.getCoinID().to0xString());
+					//Is name a JSON
+					if(buffToken.getName().toString().trim().startsWith("{")) {
+						//Get the JSON
+						JSONObject jsonname = null;
+						try {
+							jsonname = (JSONObject) new JSONParser().parse(buffToken.getName().toString());
+						} catch (ParseException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
+
+						//if (jsonname) {
+							SQL_INSERT_TOKEN.setString(3, jsonname.get("name"));
+							SQL_INSERT_TOKEN.setString(4, jsonname.get("description"));
+							SQL_INSERT_TOKEN.setString(5, jsonname.get("url"));
+							SQL_INSERT_TOKEN.setString(6, jsonname.get("ticker"));
+							SQL_INSERT_TOKEN.setString(7, jsonname.get("webvalidate"));
+						/*} else {
+							SQL_INSERT_TOKEN.setString(3, null);
+							SQL_INSERT_TOKEN.setString(4, null);
+							SQL_INSERT_TOKEN.setString(5, null);
+							SQL_INSERT_TOKEN.setString(6, null);
+							SQL_INSERT_TOKEN.setString(7, null);
+						}*/
+
+						SQL_INSERT_TOKEN.setString(8, buffToken.getName().toString());
+
+					} else {
+						SQL_INSERT_TOKEN.setString(3, buffToken.getName().toString());
+					}
+					SQL_INSERT_TOKEN.setLong(9, buffToken.getTotalTokens().getAsLong());
+					SQL_INSERT_TOKEN.setString(10, buffToken.getAmount().getAsLong());
+					SQL_INSERT_TOKEN.setInt(11, buffToken.getDecimalPlaces().getAsInt());
+					SQL_INSERT_TOKEN.setInt(12, buffToken.getScale().getAsInt());
+					SQL_INSERT_TOKEN.setString(13, buffToken.getTokenScript().toString());
+					SQL_INSERT_TOKEN.setLong(14, buffToken.getCreated().getAsLong());
+
+					//Do it.
+					SQL_INSERT_TOKEN.execute();
 				}
 			}
 
