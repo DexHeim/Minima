@@ -309,7 +309,7 @@ public class MySQLConnect {
 				SQL_INSERT_COINS.execute();
 
 				if (cc.getToken() != null)
-					MinimaLogger.log(cc.toJSON());
+					MinimaLogger.log(cc.toJSON().toString());
 			}
 
 			// Spent coins
@@ -335,7 +335,7 @@ public class MySQLConnect {
 				SQL_INSERT_COINS.execute();
 
 				if (buffCoin.getToken() != null)
-					MinimaLogger.log(buffCoin.toJSON());
+					MinimaLogger.log(buffCoin.toJSON().toString());
 			}
 
 			//MinimaLogger.log("Block "+zBlock.getTxPoW().getBlockNumber()+" have a body: "+zBody.toJSON());
