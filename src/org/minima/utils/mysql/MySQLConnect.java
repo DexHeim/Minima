@@ -119,7 +119,7 @@ public class MySQLConnect {
 						+ "  `block` bigint NOT NULL,"
 						+ "  `blkdiff` varchar(80) NOT NULL,"
 						+ "  `mmr` varchar(80) NOT NULL,"
-						+ "  `total` varchar(80) NOT NULL,"
+						+ "  `total` bigint NOT NULL,"
 						+ "  `txbodyhash` varchar(80) NOT NULL,"
 						+ "  `nonce` varchar(80) NOT NULL,"
 						+ "  `timemilli` bigint NOT NULL,"
@@ -162,7 +162,7 @@ public class MySQLConnect {
 						+ "  `address` varchar(80) NOT NULL,"
 						+ "  `miniaddress` varchar(80) NOT NULL,"
 						+ "  `tokenid` varchar(80) NOT NULL,"
-						+ "  `mmrentry` bigint NOT NULL,"
+						+ "  `mmrentry` varchar(20) NOT NULL,"
 						+ "  `created` bigint NOT NULL,"
 						+ "  PRIMARY KEY (`id`),"
 						+ "  CONSTRAINT `idx_coins_coinid` UNIQUE(`coinid`)"
@@ -321,31 +321,31 @@ public class MySQLConnect {
 			TxPoW blockTxPoW = zBlock.getTxPoW();
 
 			// Store TxPoW
-			SQL_INSERT_TXPOW.setString(1, blockTxPoW.getTxPoWID().to0xString());
-			SQL_INSERT_TXPOW.setInt(2, blockTxPoW.getSuperLevel().getAsInt());
-			SQL_INSERT_TXPOW.setLong(3, blockTxPoW.getSizeinBytes().getAsLong());
+			SQL_INSERT_TXPOW.setString(1, blockTxPoW.getTxPoWID());
+			SQL_INSERT_TXPOW.setInt(2, blockTxPoW.getSuperLevel());
+			SQL_INSERT_TXPOW.setLong(3, blockTxPoW.getSizeinBytes());
 			SQL_INSERT_TXPOW.setInt(4, blockTxPoW.getBurn().getAsInt());
 
 			//Do it.
 			SQL_INSERT_TXPOW.execute();
 
 			// Store TxPoW TxHeader
-			SQL_INSERT_TXHEADER.setString(1, blockTxPoW.getTxPoWID().to0xString());
+			SQL_INSERT_TXHEADER.setString(1, blockTxPoW.getTxPoWID());
 			SQL_INSERT_TXHEADER.setString(2, blockTxPoW.getChainID().to0xString());
-			SQL_INSERT_TXHEADER.setLong(3, blockTxPoW.getBlockNumber().toString());
+			SQL_INSERT_TXHEADER.setLong(3, blockTxPoW.getBlockNumber().getAsLong());
 			SQL_INSERT_TXHEADER.setString(4, blockTxPoW.getBlockDifficulty().to0xString());
 			SQL_INSERT_TXHEADER.setString(5, blockTxPoW.getMMRRoot().to0xString());
-			SQL_INSERT_TXHEADER.setString(6, blockTxPoW.getMMRTotal().to0xString());
+			SQL_INSERT_TXHEADER.setLong(6, blockTxPoW.getMMRTotal()).getAsLong();
 			SQL_INSERT_TXHEADER.setString(7, blockTxPoW.getTxHeader().getBodyHash().to0xString());
 			SQL_INSERT_TXHEADER.setString(8, blockTxPoW.getNonce().toString());
-			SQL_INSERT_TXHEADER.setLong(9, blockTxPoW.setTimeMilli().getAsLong());
+			SQL_INSERT_TXHEADER.setLong(9, blockTxPoW.getTimeMilli().getAsLong());
 
 			//Do it.
 			SQL_INSERT_TXHEADER.execute();
 
 			// Store TxPoW ID List (Transactions)
 			for (MiniData txpow_id : zBlock.getTxPoW().getBlockTransactions()) {
-				SQL_INSERT_TXPOWIDLIST.setString(1, blockTxPoW.getTxPoWID().to0xString());
+				SQL_INSERT_TXPOWIDLIST.setString(1, blockTxPoW.getTxPoWID());
 				SQL_INSERT_TXPOWIDLIST.setString(2, txpow_id.to0xString());
 
 				//Do it.
@@ -358,22 +358,22 @@ public class MySQLConnect {
 			ArrayList<Coin> outputs = zBlock.getOutputCoins();
 
 			for(Coin cc : outputs) {
-				SQL_INSERT_COINS.clearParameters();
+				SQL_INSERT_COIN.clearParameters();
 
-				SQL_INSERT_COINS.setLong(1, blockTxPoW.getBlockNumber().getAsLong());
-				SQL_INSERT_COINS.setString(2, cc.getCoinID().to0xString());
-				SQL_INSERT_COINS.setString(3, cc.getAmount().toString());
-				SQL_INSERT_COINS.setString(4, cc.getAddress().to0xString());
-				SQL_INSERT_COINS.setString(5, Address.makeMinimaAddress(cc.getAddress()));
-				SQL_INSERT_COINS.setString(6, cc.getTokenID().to0xString());
-				SQL_INSERT_COINS.setLong(7, cc.getMMREntryNumber().getAsLong());
-				SQL_INSERT_COINS.setLong(8, cc.getBlockCreated().getAsLong());
+				SQL_INSERT_COIN.setLong(1, blockTxPoW.getBlockNumber().getAsLong());
+				SQL_INSERT_COIN.setString(2, cc.getCoinID().to0xString());
+				SQL_INSERT_COIN.setString(3, cc.getAmount().toString());
+				SQL_INSERT_COIN.setString(4, cc.getAddress().to0xString());
+				SQL_INSERT_COIN.setString(5, Address.makeMinimaAddress(cc.getAddress()));
+				SQL_INSERT_COIN.setString(6, cc.getTokenID().to0xString());
+				SQL_INSERT_COIN.setString(7, cc.getMMREntryNumber().toString());
+				SQL_INSERT_COIN.setLong(8, cc.getBlockCreated().getAsLong());
 
 				//Do it.
-				SQL_INSERT_COINS.execute();
+				SQL_INSERT_COIN.execute();
 
 				//Store link TxPoW-Coin
-				SQL_INSERT_TXPOWCOIN.setString(1, blockTxPoW.getTxPoWID().to0xString());
+				SQL_INSERT_TXPOWCOIN.setString(1, blockTxPoW.getTxPoWID());
 				SQL_INSERT_TXPOWCOIN.setString(2, cc.getCoinID().to0xString());
 
 				//Do it.
@@ -386,21 +386,21 @@ public class MySQLConnect {
 			//Set main params
 			for(CoinProof incoin : inputs) {
 				//Get the Query ready
-				SQL_INSERT_COINS.clearParameters();
+				SQL_INSERT_COIN.clearParameters();
 
 				Coin buffCoin = incoin.getCoin();
 
-				SQL_INSERT_COINS.setLong(1, blockTxPoW.getBlockNumber().getAsLong());
-				SQL_INSERT_COINS.setString(2, buffCoin.getCoinID().to0xString());
-				SQL_INSERT_COINS.setString(3, buffCoin.getAmount().toString());
-				SQL_INSERT_COINS.setString(4, buffCoin.getAddress().to0xString());
-				SQL_INSERT_COINS.setString(5, Address.makeMinimaAddress(buffCoin.getAddress()));
-				SQL_INSERT_COINS.setString(6, buffCoin.getTokenID().to0xString());
-				SQL_INSERT_COINS.setLong(7, buffCoin.getMMREntryNumber().getAsLong());
-				SQL_INSERT_COINS.setLong(8, buffCoin.getBlockCreated().getAsLong());
+				SQL_INSERT_COIN.setLong(1, blockTxPoW.getBlockNumber().getAsLong());
+				SQL_INSERT_COIN.setString(2, buffCoin.getCoinID().to0xString());
+				SQL_INSERT_COIN.setString(3, buffCoin.getAmount().toString());
+				SQL_INSERT_COIN.setString(4, buffCoin.getAddress().to0xString());
+				SQL_INSERT_COIN.setString(5, Address.makeMinimaAddress(buffCoin.getAddress()));
+				SQL_INSERT_COIN.setString(6, buffCoin.getTokenID().to0xString());
+				SQL_INSERT_COIN.setLong(7, buffCoin.getMMREntryNumber().getAsLong());
+				SQL_INSERT_COIN.setLong(8, buffCoin.getBlockCreated().getAsLong());
 
 				//Do it.
-				SQL_INSERT_COINS.execute();
+				SQL_INSERT_COIN.execute();
 
 				//Is coin have token
 				if (buffCoin.getToken() != null) {
@@ -439,7 +439,7 @@ public class MySQLConnect {
 						SQL_INSERT_TOKEN.setString(3, buffToken.getName().toString());
 					}
 					SQL_INSERT_TOKEN.setLong(9, buffToken.getTotalTokens().getAsLong());
-					SQL_INSERT_TOKEN.setString(10, buffToken.getAmount().getAsLong());
+					SQL_INSERT_TOKEN.setLong(10, buffToken.getAmount().getAsLong());
 					SQL_INSERT_TOKEN.setInt(11, buffToken.getDecimalPlaces().getAsInt());
 					SQL_INSERT_TOKEN.setInt(12, buffToken.getScale().getAsInt());
 					SQL_INSERT_TOKEN.setString(13, buffToken.getTokenScript().toString());
