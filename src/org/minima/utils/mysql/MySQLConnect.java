@@ -335,7 +335,7 @@ public class MySQLConnect {
 			SQL_INSERT_TXHEADER.setLong(3, blockTxPoW.getBlockNumber().getAsLong());
 			SQL_INSERT_TXHEADER.setString(4, blockTxPoW.getBlockDifficulty().to0xString());
 			SQL_INSERT_TXHEADER.setString(5, blockTxPoW.getMMRRoot().to0xString());
-			SQL_INSERT_TXHEADER.setLong(6, blockTxPoW.getMMRTotal()).getAsLong();
+			SQL_INSERT_TXHEADER.setLong(6, blockTxPoW.getMMRTotal().getAsLong());
 			SQL_INSERT_TXHEADER.setString(7, blockTxPoW.getTxHeader().getBodyHash().to0xString());
 			SQL_INSERT_TXHEADER.setString(8, blockTxPoW.getNonce().toString());
 			SQL_INSERT_TXHEADER.setLong(9, blockTxPoW.getTimeMilli().getAsLong());
@@ -396,7 +396,7 @@ public class MySQLConnect {
 				SQL_INSERT_COIN.setString(4, buffCoin.getAddress().to0xString());
 				SQL_INSERT_COIN.setString(5, Address.makeMinimaAddress(buffCoin.getAddress()));
 				SQL_INSERT_COIN.setString(6, buffCoin.getTokenID().to0xString());
-				SQL_INSERT_COIN.setLong(7, buffCoin.getMMREntryNumber().getAsLong());
+				SQL_INSERT_COIN.setString(7, buffCoin.getMMREntryNumber().toString());
 				SQL_INSERT_COIN.setLong(8, buffCoin.getBlockCreated().getAsLong());
 
 				//Do it.
