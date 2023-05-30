@@ -360,14 +360,13 @@ public class MySQLConnect {
 			for(Coin cc : outputs) {
 				SQL_INSERT_COIN.clearParameters();
 
-				SQL_INSERT_COIN.setLong(1, blockTxPoW.getBlockNumber().getAsLong());
-				SQL_INSERT_COIN.setString(2, cc.getCoinID().to0xString());
-				SQL_INSERT_COIN.setString(3, cc.getAmount().toString());
-				SQL_INSERT_COIN.setString(4, cc.getAddress().to0xString());
-				SQL_INSERT_COIN.setString(5, Address.makeMinimaAddress(cc.getAddress()));
-				SQL_INSERT_COIN.setString(6, cc.getTokenID().to0xString());
-				SQL_INSERT_COIN.setString(7, cc.getMMREntryNumber().toString());
-				SQL_INSERT_COIN.setLong(8, cc.getBlockCreated().getAsLong());
+				SQL_INSERT_COIN.setString(1, cc.getCoinID().to0xString());
+				SQL_INSERT_COIN.setString(2, cc.getAmount().toString());
+				SQL_INSERT_COIN.setString(3, cc.getAddress().to0xString());
+				SQL_INSERT_COIN.setString(4, Address.makeMinimaAddress(cc.getAddress()));
+				SQL_INSERT_COIN.setString(5, cc.getTokenID().to0xString());
+				SQL_INSERT_COIN.setString(6, cc.getMMREntryNumber().toString());
+				SQL_INSERT_COIN.setLong(7, cc.getBlockCreated().getAsLong());
 
 				//Do it.
 				SQL_INSERT_COIN.execute();
@@ -390,14 +389,13 @@ public class MySQLConnect {
 
 				Coin buffCoin = incoin.getCoin();
 
-				SQL_INSERT_COIN.setLong(1, blockTxPoW.getBlockNumber().getAsLong());
-				SQL_INSERT_COIN.setString(2, buffCoin.getCoinID().to0xString());
-				SQL_INSERT_COIN.setString(3, buffCoin.getAmount().toString());
-				SQL_INSERT_COIN.setString(4, buffCoin.getAddress().to0xString());
-				SQL_INSERT_COIN.setString(5, Address.makeMinimaAddress(buffCoin.getAddress()));
-				SQL_INSERT_COIN.setString(6, buffCoin.getTokenID().to0xString());
-				SQL_INSERT_COIN.setString(7, buffCoin.getMMREntryNumber().toString());
-				SQL_INSERT_COIN.setLong(8, buffCoin.getBlockCreated().getAsLong());
+				SQL_INSERT_COIN.setString(1, buffCoin.getCoinID().to0xString());
+				SQL_INSERT_COIN.setString(2, buffCoin.getAmount().toString());
+				SQL_INSERT_COIN.setString(3, buffCoin.getAddress().to0xString());
+				SQL_INSERT_COIN.setString(4, Address.makeMinimaAddress(buffCoin.getAddress()));
+				SQL_INSERT_COIN.setString(5, buffCoin.getTokenID().to0xString());
+				SQL_INSERT_COIN.setString(6, buffCoin.getMMREntryNumber().toString());
+				SQL_INSERT_COIN.setLong(7, buffCoin.getBlockCreated().getAsLong());
 
 				//Do it.
 				SQL_INSERT_COIN.execute();
