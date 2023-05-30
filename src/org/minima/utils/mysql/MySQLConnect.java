@@ -105,7 +105,7 @@ public class MySQLConnect {
 						+ "  `size` bigint NOT NULL,"
 						+ "  `burn` int DEFAULT 0 NOT NULL,"
 						+ "  PRIMARY KEY(`id`),"
-						+ "  CONSTRAINT `idx_txpow_txpowid` UNIQUE(`txpowid`)"
+						+ "  CONSTRAINT `uidx_txpow_txpowid` UNIQUE(`txpowid`)"
 						+ ")";
 
 		//Run it..
@@ -124,7 +124,8 @@ public class MySQLConnect {
 						+ "  `nonce` varchar(80) NOT NULL,"
 						+ "  `timemilli` bigint NOT NULL,"
 						+ "  PRIMARY KEY(`id`),"
-						+ "  CONSTRAINT `idx_txheader_txpowid` UNIQUE(`txpowid`)"
+						+ "  CONSTRAINT `idx_txheader_block` INDEX(`block`),"
+						+ "  CONSTRAINT `uidx_txheader_txpowid` UNIQUE(`txpowid`)"
 						+ ")";
 
 		//Run it..
@@ -136,7 +137,10 @@ public class MySQLConnect {
 						+ "  `txpowid` varchar(80) NOT NULL,"
 						+ "  `txpowid_txn` varchar(80) NOT NULL,"
 						+ "  PRIMARY KEY(`id`),"
-						+ "  CONSTRAINT `idx_txpowidlist_txpowid_txpowid_txn` UNIQUE(`txpowid`, `txpowid_txn`)"
+						+ "  CONSTRAINT `idx_txpow_coin_txpowid` INDEX(`txpowid`, `coinid`),"
+						+ "  CONSTRAINT `idx_txpow_coin_coinid` INDEX(`txpowid`, `coinid`),"
+						+ "  CONSTRAINT `idx_txpow_coin_txpowid_coinid` INDEX(`txpowid`, `coinid`),"
+						+ "  CONSTRAINT `uidx_txpowidlist_txpowid_txpowid_txn` UNIQUE(`txpowid`, `txpowid_txn`)"
 						+ ")";
 
 		//Run it..
@@ -148,7 +152,9 @@ public class MySQLConnect {
 						+ "  `txpowid` varchar(80) NOT NULL,"
 						+ "  `coinid` varchar(80) NOT NULL,"
 						+ "  PRIMARY KEY(`id`),"
-						+ "  CONSTRAINT `idx_txpow_coin_txpowid_coinid` UNIQUE(`txpowid`, `coinid`)"
+						+ "  CONSTRAINT `idx_txpow_coin_txpowid` INDEX(`txpowid`),"
+						+ "  CONSTRAINT `idx_txpow_coin_coinid` INDEX(`coinid`),"
+						+ "  CONSTRAINT `uidx_txpow_coin_txpowid_coinid` UNIQUE(`txpowid`, `coinid`)"
 						+ ")";
 
 		//Run it..
@@ -165,7 +171,9 @@ public class MySQLConnect {
 						+ "  `mmrentry` varchar(20) NOT NULL,"
 						+ "  `created` bigint NOT NULL,"
 						+ "  PRIMARY KEY (`id`),"
-						+ "  CONSTRAINT `idx_coins_coinid` UNIQUE(`coinid`)"
+						+ "  CONSTRAINT `idx_coins_address` INDEX(`address`),"
+						+ "  CONSTRAINT `idx_coins_miniaddress` INDEX(`miniaddress`),"
+						+ "  CONSTRAINT `uidx_coins_coinid` UNIQUE(`coinid`)"
 						+ ")";
 
 		//Run it..
@@ -189,7 +197,8 @@ public class MySQLConnect {
 						+ "  `script` text NOT NULL,"
 						+ "  `created` bigint NOT NULL,"
 						+ "  PRIMARY KEY (`id`),"
-						+ "  CONSTRAINT `idx_tokens_tokenid` UNIQUE(`tokenid`)"
+						+ "  CONSTRAINT `idx_tokens_coinid` INDEX(`coinid`),"
+						+ "  CONSTRAINT `uidx_tokens_tokenid` UNIQUE(`tokenid`)"
 						+ ")";
 
 		//Run it..
