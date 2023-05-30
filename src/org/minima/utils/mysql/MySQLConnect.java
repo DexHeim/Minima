@@ -180,7 +180,7 @@ public class MySQLConnect {
 						+ "  `description` varchar(10000) NULL,"
 						+ "  `url` text NULL,"
 						+ "  `ticker` varchar(80) NULL,"
-						+ "  `webvalidate` varchar(80) NULL,"
+						+ "  `webvalidate` varchar(1000) NULL,"
 						+ "  `object` text NULL,"
 						+ "  `total` bigint NOT NULL,"
 						+ "  `totalamount` varchar(60) NOT NULL,"
