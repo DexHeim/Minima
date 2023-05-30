@@ -418,26 +418,26 @@ public class MySQLConnect {
 						}
 
 						//if (jsonname) { tokenid, coinid, name, description, url, ticker, webvalidate, object,
-							if (jsonname.has("name"))
+							if (jsonname.containsKey("name"))
 								SQL_INSERT_TOKEN.setString(3, jsonname.get("name").toString());
 							else
-								SQL_INSERT_TOKEN.setNull(3);
-							if (jsonname.has("description"))
+								SQL_INSERT_TOKEN.setNull(3, java.sql.Types.VARCHAR);
+							if (jsonname.containsKey("description"))
 								SQL_INSERT_TOKEN.setString(4, jsonname.get("description").toString());
 							else
-								SQL_INSERT_TOKEN.setNull(4);
-							if (jsonname.has("url"))
+								SQL_INSERT_TOKEN.setNull(4, java.sql.Types.VARCHAR);
+							if (jsonname.containsKey("url"))
 								SQL_INSERT_TOKEN.setString(5, jsonname.get("url").toString());
 							else
-								SQL_INSERT_TOKEN.setNull(5);
-							if (jsonname.has("ticker"))
+								SQL_INSERT_TOKEN.setNull(5, java.sql.Types.VARCHAR);
+							if (jsonname.containsKey("ticker"))
 								SQL_INSERT_TOKEN.setString(6, jsonname.get("ticker").toString());
 							else
-								SQL_INSERT_TOKEN.setNull(6);
-							if (jsonname.has("webvalidate"))
+								SQL_INSERT_TOKEN.setNull(6, java.sql.Types.VARCHAR);
+							if (jsonname.containsKey("webvalidate"))
 								SQL_INSERT_TOKEN.setString(7, jsonname.get("webvalidate").toString());
 							else
-								SQL_INSERT_TOKEN.setNull(7);
+								SQL_INSERT_TOKEN.setNull(7, java.sql.Types.VARCHAR);
 						/*} else {
 							SQL_INSERT_TOKEN.setString(3, null);
 							SQL_INSERT_TOKEN.setString(4, null);
