@@ -282,7 +282,7 @@ public class MySQLConnect {
 		ArrayList<String> res_queries = new ArrayList<>();
 		//Multiple results
 		while(rs.next())
-			res_queries.Add(rs.getString("sql_indexes"));
+			res_queries.add(rs.getString("sql_indexes"));
 
 		//Exec all queries
 		for (String res_query : res_queries)
