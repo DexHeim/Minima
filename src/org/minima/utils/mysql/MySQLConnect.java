@@ -18,6 +18,7 @@ import org.minima.utils.MinimaLogger;
 
 import org.minima.utils.Streamable;
 import org.minima.objects.Coin;
+import org.minima.objects.StateVariable;
 import org.minima.objects.CoinProof;
 import org.minima.objects.Token;
 import org.minima.objects.Address;
@@ -482,6 +483,9 @@ public class MySQLConnect {
 
 				//Do it.
 				SQL_INSERT_COIN.execute();
+
+				if (buffCoin.getState().size() > 0)
+					MinimaLogger.log(buffCoin.toJSON().toString());
 
 				//Is coin have token
 				if (buffCoin.getToken() != null) {
