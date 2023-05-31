@@ -191,7 +191,7 @@ public class MySQLConnect {
 						+ "  `coinid` varchar(80) NOT NULL,"
 						+ "  `port` int NOT NULL,"
 						+ "  `type` int NOT NULL,"
-						+ "  `data` varchar(80) NULL,"
+						+ "  `data` text NULL,"
 						+ "  PRIMARY KEY (`id`),"
 						+ "  INDEX `idx_coin_state_coinid` (`coinid`)"
 						+ ")";
