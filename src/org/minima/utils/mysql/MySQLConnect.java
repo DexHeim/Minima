@@ -276,22 +276,18 @@ public class MySQLConnect {
 			+ " GROUP BY tbl_name, tbl_index) AS tmp "
 			+ " GROUP BY tbl_name; ";
 
-		MinimaLogger.log(buffSql);
-
 		//Run the query
 		ResultSet rs = stmt.executeQuery(buffSql);
 
-		MinimaLogger.log("Executed Drop indexes query");
-
-		String res_query;
+		ArrayList<String> res_queries = new ArrayList<>;
 		//Multiple results
-		while(rs.next()) {
-			//Get the block
-			res_query = rs.getString("sql_indexes");
+		while(rs.next())
+			res_queries.Add(rs.getString("sql_indexes"));
 
-			MinimaLogger.log(res_query);
+		//Exec all queries
+		for (String res_query : res_queries)
 			stmt.execute(res_query);
-		}
+
 		stmt.close();
 	}
 
@@ -329,8 +325,6 @@ public class MySQLConnect {
 			+ "	   GROUP BY tbl_name, tbl_index) AS tmp "
 			+ " GROUP BY tbl_name; ";
 
-		MinimaLogger.log(buffSql);
-
 		//Run the query
 		ResultSet rs = stmt.executeQuery(buffSql);
 
@@ -341,7 +335,6 @@ public class MySQLConnect {
 			//Get the block
 			res_query = rs.getString("sql_indexes");
 
-			MinimaLogger.log(res_query);
 			mIndexes.add(res_query);
 		}
 
