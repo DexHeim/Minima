@@ -506,9 +506,10 @@ public class MySQLConnect {
 				// Store coin state
 				if (buffCoin.getState().size() > 0) {
 					for (StateVariable coin_state : buffCoin.getState()) {
-						SQL_INSERT_COIN_STATE.setInt(1, coin_state.getPort());
-						SQL_INSERT_COIN_STATE.setInt(2, coin_state.getType().getValue());
-						SQL_INSERT_COIN_STATE.setString(3, coin_state.getData().toString());
+						SQL_INSERT_COIN_STATE.setString(1, buffCoin.getCoinID().to0xString());
+						SQL_INSERT_COIN_STATE.setInt(2, coin_state.getPort());
+						SQL_INSERT_COIN_STATE.setInt(3, coin_state.getType().getValue());
+						SQL_INSERT_COIN_STATE.setString(4, coin_state.getData().toString());
 
 						//Do it.
 						SQL_INSERT_COIN_STATE.execute();
