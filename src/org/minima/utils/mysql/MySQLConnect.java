@@ -419,7 +419,7 @@ public class MySQLConnect {
 			SQL_INSERT_TXPOW.setString(1, blockTxPoW.getTxPoWID());
 			SQL_INSERT_TXPOW.setInt(2, blockTxPoW.getSuperLevel());
 			SQL_INSERT_TXPOW.setLong(3, blockTxPoW.getSizeinBytes());
-			SQL_INSERT_TXPOW.setObject(4, Float.valueOf(blockTxPoW.getBurn().getAsBigDecimal()), java.sql.Types.FLOAT);
+			SQL_INSERT_TXPOW.setFloat(4, blockTxPoW.getBurn().getAsBigDecimal());
 
 			//Do it.
 			SQL_INSERT_TXPOW.execute();
