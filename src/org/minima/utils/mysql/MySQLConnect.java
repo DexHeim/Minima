@@ -61,6 +61,7 @@ public class MySQLConnect {
 	PreparedStatement SQL_INSERT_TXPOWIDLIST	= null;
 	PreparedStatement SQL_INSERT_TXPOWCOIN		= null;
 	PreparedStatement SQL_INSERT_COIN					= null;
+	PreparedStatement SQL_INSERT_COIN_STATE		= null;
 	PreparedStatement SQL_INSERT_TOKEN				= null;
 
 	public MySQLConnect(String zHost, String zDatabase, String zUsername, String zPassword) {
@@ -165,8 +166,8 @@ public class MySQLConnect {
 		//Run it..
 		stmt.execute(tbl_txpow_coin);
 
-		//Create the coins table
-		String coins = "CREATE TABLE IF NOT EXISTS `coins` ("
+		//Create the coin table
+		String coin = "CREATE TABLE IF NOT EXISTS `coin` ("
 						+ "  `id` int NOT NULL AUTO_INCREMENT,"
 						+ "  `coinid` varchar(80) NOT NULL,"
 						+ "  `amount` varchar(64) NOT NULL,"
@@ -176,16 +177,30 @@ public class MySQLConnect {
 						+ "  `mmrentry` varchar(20) NOT NULL,"
 						+ "  `created` bigint NOT NULL,"
 						+ "  PRIMARY KEY (`id`),"
-						+ "  INDEX `idx_coins_address` (`address`),"
-						+ "  INDEX `idx_coins_miniaddress` (`miniaddress`),"
-						+ "  CONSTRAINT `uidx_coins_coinid` UNIQUE(`coinid`)"
+						+ "  INDEX `idx_coin_address` (`address`),"
+						+ "  INDEX `idx_coin_miniaddress` (`miniaddress`),"
+						+ "  CONSTRAINT `uidx_coin_coinid` UNIQUE(`coinid`)"
 						+ ")";
 
 		//Run it..
-		stmt.execute(coins);
+		stmt.execute(coin);
 
-		//Create the tokens table
-		String tokens = "CREATE TABLE IF NOT EXISTS `tokens` ("
+		//Create the coin states table
+		String coin_state = "CREATE TABLE IF NOT EXISTS `coin_state` ("
+						+ "  `id` int NOT NULL AUTO_INCREMENT,"
+						+ "  `coinid` varchar(80) NOT NULL,"
+						+ "  `port` int NOT NULL,"
+						+ "  `type` int NOT NULL,"
+						+ "  `data` varchar(80) NULL,"
+						+ "  PRIMARY KEY (`id`),"
+						+ "  INDEX `idx_coin_state_coinid` (`coinid`)"
+						+ ")";
+
+		//Run it..
+		stmt.execute(coin_statec);
+
+		//Create the token table
+		String token = "CREATE TABLE IF NOT EXISTS `token` ("
 						+ "  `id` int NOT NULL AUTO_INCREMENT,"
 						+ "  `tokenid` varchar(80) NOT NULL,"
 						+ "  `coinid` varchar(80) NOT NULL,"
@@ -202,12 +217,12 @@ public class MySQLConnect {
 						+ "  `script` text NOT NULL,"
 						+ "  `created` bigint NOT NULL,"
 						+ "  PRIMARY KEY (`id`),"
-						+ "  INDEX `idx_tokens_coinid` (`coinid`),"
-						+ "  CONSTRAINT `uidx_tokens_tokenid` UNIQUE(`tokenid`)"
+						+ "  INDEX `idx_token_coinid` (`coinid`),"
+						+ "  CONSTRAINT `uidx_token_tokenid` UNIQUE(`tokenid`)"
 						+ ")";
 
 		//Run it..
-		stmt.execute(tokens);
+		stmt.execute(token);
 
 		//All done..
 		stmt.close();
@@ -234,10 +249,12 @@ public class MySQLConnect {
 		SQL_INSERT_TXPOWIDLIST 	= mConnection.prepareStatement("INSERT INTO txpowidlist ( txpowid, txpowid_txn ) VALUES ( ?, ? )");
 		SQL_INSERT_TXPOWCOIN 	= mConnection.prepareStatement("INSERT INTO txpow_coin ( txpowid, coinid ) VALUES ( ?, ? )");
 
-		String insert_coin = "INSERT INTO coins ( coinid, amount, address, miniaddress, tokenid, mmrentry, created ) VALUES ( ?, ?, ?, ?, ?, ?, ? ) AS new ON DUPLICATE KEY UPDATE mmrentry = new.mmrentry, created = new.created";
+		String insert_coin = "INSERT INTO coin ( coinid, amount, address, miniaddress, tokenid, mmrentry, created ) VALUES ( ?, ?, ?, ?, ?, ?, ? ) AS new ON DUPLICATE KEY UPDATE mmrentry = new.mmrentry, created = new.created";
 		SQL_INSERT_COIN 	= mConnection.prepareStatement(insert_coin);
 
-		String insert_token = "INSERT INTO tokens ( tokenid, coinid, name, description, url, ticker, webvalidate, object, total, totalamount, decimals, scale, script, created ) VALUES ( ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ? ) ON DUPLICATE KEY UPDATE id=id";
+		SQL_INSERT_COIN_STATE = mConnection.prepareStatement("INSERT INTO coin_state ( coinid, port, type, data ) VALUES ( ?, ?, ?, ? )");
+
+		String insert_token = "INSERT INTO token ( tokenid, coinid, name, description, url, ticker, webvalidate, object, total, totalamount, decimals, scale, script, created ) VALUES ( ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ? ) ON DUPLICATE KEY UPDATE id=id";
 		SQL_INSERT_TOKEN 	= mConnection.prepareStatement(insert_token);
 	}
 
@@ -484,8 +501,17 @@ public class MySQLConnect {
 				//Do it.
 				SQL_INSERT_COIN.execute();
 
-				if (buffCoin.getState().size() > 0)
-					MinimaLogger.log(buffCoin.toJSON().toString());
+				// Store coin state
+				if (buffCoin.getState().size() > 0) {
+					for (StateVariable coin_state : buffCoin.getState()) {
+						SQL_INSERT_COIN_STATE.setInt(1, coin_state.getPort());
+						SQL_INSERT_COIN_STATE.setInt(2, coin_state.getType().getValue());
+						SQL_INSERT_COIN_STATE.setStr(3, coin_state.getData().toString());
+
+						//Do it.
+						SQL_INSERT_COIN_STATE.execute();
+					}
+				}
 
 				//Is coin have token
 				if (buffCoin.getToken() != null) {
