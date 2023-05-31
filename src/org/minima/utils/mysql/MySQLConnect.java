@@ -124,7 +124,7 @@ public class MySQLConnect {
 						+ "  `nonce` varchar(80) NOT NULL,"
 						+ "  `timemilli` bigint NOT NULL,"
 						+ "  PRIMARY KEY(`id`),"
-						+ "  INDEX (`block`),"
+						+ "  FULLTEXT INDEX `idx_txheader_block` (`block`),"
 						+ "  CONSTRAINT `uidx_txheader_txpowid` UNIQUE(`txpowid`)"
 						+ ")";
 
@@ -137,8 +137,8 @@ public class MySQLConnect {
 						+ "  `txpowid` varchar(80) NOT NULL,"
 						+ "  `txpowid_txn` varchar(80) NOT NULL,"
 						+ "  PRIMARY KEY(`id`),"
-						+ "  INDEX (`txpowid`),"
-						+ "  INDEX (`txpowid_txn`),"
+						+ "  FULLTEXT INDEX `idx_txpowidlist_txpowid` (`txpowid`),"
+						+ "  FULLTEXT INDEX `idx_txpowidlist_txpowid_txn` (`txpowid_txn`),"
 						+ "  CONSTRAINT `uidx_txpowidlist_txpowid_txpowid_txn` UNIQUE(`txpowid`, `txpowid_txn`)"
 						+ ")";
 
@@ -151,8 +151,8 @@ public class MySQLConnect {
 						+ "  `txpowid` varchar(80) NOT NULL,"
 						+ "  `coinid` varchar(80) NOT NULL,"
 						+ "  PRIMARY KEY(`id`),"
-						+ "  INDEX (`txpowid`),"
-						+ "  INDEX (`coinid`),"
+						+ "  FULLTEXT INDEX `idx_txpow_coin_txpowid` (`txpowid`),"
+						+ "  FULLTEXT INDEX `idx_txpow_coin_coinid` (`coinid`),"
 						+ "  CONSTRAINT `uidx_txpow_coin_txpowid_coinid` UNIQUE(`txpowid`, `coinid`)"
 						+ ")";
 
@@ -170,8 +170,8 @@ public class MySQLConnect {
 						+ "  `mmrentry` varchar(20) NOT NULL,"
 						+ "  `created` bigint NOT NULL,"
 						+ "  PRIMARY KEY (`id`),"
-						+ "  INDEX (`address`),"
-						+ "  INDEX (`miniaddress`),"
+						+ "  FULLTEXT INDEX `idx_coins_address` (`address`),"
+						+ "  FULLTEXT INDEX `idx_coins_miniaddress` (`miniaddress`),"
 						+ "  CONSTRAINT `uidx_coins_coinid` UNIQUE(`coinid`)"
 						+ ")";
 
@@ -196,7 +196,7 @@ public class MySQLConnect {
 						+ "  `script` text NOT NULL,"
 						+ "  `created` bigint NOT NULL,"
 						+ "  PRIMARY KEY (`id`),"
-						+ "  INDEX (`coinid`),"
+						+ "  FULLTEXT INDEX `idx_tokens_coinid` (`coinid`),"
 						+ "  CONSTRAINT `uidx_tokens_tokenid` UNIQUE(`tokenid`)"
 						+ ")";
 
