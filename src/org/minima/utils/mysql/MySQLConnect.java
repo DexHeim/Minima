@@ -281,11 +281,15 @@ public class MySQLConnect {
 		//Run the query
 		ResultSet rs = stmt.executeQuery(buffSql);
 
+		MinimaLogger.log("Executed Drop indexes query");
+
+		String res_query;
 		//Multiple results
 		while(rs.next()) {
 			//Get the block
-			String res_query = rs.getString("sql_indexes");
+			res_query = rs.getString("sql_indexes");
 
+			MinimaLogger.log(res_query);
 			stmt.execute(res_query);
 		}
 		stmt.close();
@@ -330,12 +334,14 @@ public class MySQLConnect {
 		//Run the query
 		ResultSet rs = stmt.executeQuery(buffSql);
 
+		String res_query;
 		//Multiple results
 		while(rs.next()) {
 
 			//Get the block
-			String res_query = rs.getString("sql_indexes");
+			res_query = rs.getString("sql_indexes");
 
+			MinimaLogger.log(res_query);
 			mIndexes.add(res_query);
 		}
 
