@@ -262,7 +262,6 @@ public class MySQLConnect {
 		stmt.execute("DROP TABLE txpow");
 		stmt.execute("DROP TABLE txheader");
 		stmt.execute("DROP TABLE txpowidlist");
-		stmt.execute("DROP TABLE txpow_coin");
 		stmt.execute("DROP TABLE coin");
 		stmt.execute("DROP TABLE coin_state");
 		stmt.execute("DROP TABLE token");
