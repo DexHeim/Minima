@@ -267,15 +267,14 @@ public class MySQLConnect {
 
 		Statement stmt = mConnection.createStatement();
 
-		String buffSql = "SET SESSION group_concat_max_len=10240;"
-			+ " SELECT CONCAT('ALTER TABLE ', `Table`, ' DROP INDEX ', GROUP_CONCAT(`Index` SEPARATOR ', DROP INDEX '),';' ) AS sql_indexes"
-			+ " FROM ("
-			+ " SELECT table_name AS `Table`,"
-			+ "        index_name AS `Index`"
-			+ " FROM information_schema.statistics"
-			+ " WHERE NON_UNIQUE = 1 AND table_schema = '"+mDatabase+"'"
-			+ " GROUP BY `Table`, `Index`) AS tmp"
-			+ " GROUP BY `Table`;";
+		String buffSql = " SELECT CONCAT('ALTER TABLE ', tbl_name, ' DROP INDEX ', GROUP_CONCAT(tbl_index SEPARATOR ', DROP INDEX '),';' ) AS sql_indexes "
+			+ " FROM ( "
+			+ " SELECT table_name AS tbl_name, "
+			+ "        index_name AS tbl_index "
+			+ " FROM information_schema.statistics "
+			+ " WHERE NON_UNIQUE = 1 AND table_schema = '"+mDatabase+"' "
+			+ " GROUP BY tbl_name, tbl_index) AS tmp "
+			+ " GROUP BY tbl_name; ";
 
 		MinimaLogger.log(buffSql);
 
