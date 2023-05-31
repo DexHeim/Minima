@@ -485,7 +485,7 @@ public class MySQLConnect {
 				Coin buffCoin = incoin.getCoin();
 
 				SQL_INSERT_COIN.setString(1, buffCoin.getCoinID().to0xString());
-				SQL_INSERT_COIN.setObject(2, buffCoin.getAmount().getAsBigDecimalc(), java.sql.Types.FLOAT);
+				SQL_INSERT_COIN.setObject(2, buffCoin.getAmount().getAsBigDecimal(), java.sql.Types.FLOAT);
 				SQL_INSERT_COIN.setString(3, buffCoin.getAddress().to0xString());
 				SQL_INSERT_COIN.setString(4, Address.makeMinimaAddress(buffCoin.getAddress()));
 				SQL_INSERT_COIN.setString(5, buffCoin.getTokenID().to0xString());
