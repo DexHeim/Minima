@@ -264,26 +264,21 @@ public class MySQLConnect {
 	}
 
 	public void deleteIndexes() throws SQLException {
-		PreparedStatement pstmt = mConnection.prepareStatement(
+
+		Statement stmt = mConnection.createStatement();
+
+		//Run the query
+		ResultSet rs = stmt.executeQuery(
 				" SET SESSION group_concat_max_len=10240;"
 			+ " SELECT CONCAT('ALTER TABLE ', `Table`, ' DROP INDEX ', GROUP_CONCAT(`Index` SEPARATOR ', DROP INDEX '),';' ) AS sql_indexes"
 			+ " FROM ("
 			+ " SELECT table_name AS `Table`,"
 			+ "        index_name AS `Index`"
 			+ " FROM information_schema.statistics"
-			+ " WHERE NON_UNIQUE = 1 AND table_schema = '?'"
+			+ " WHERE NON_UNIQUE = 1 AND table_schema = '"+mDatabase+"'"
 			+ " GROUP BY `Table`, `Index`) AS tmp"
 			+ " GROUP BY `Table`");
 
-		//Set search params
-		pstmt.clearParameters();
-
-		pstmt.setString(1, mDatabase);
-
-		//Run the query
-		ResultSet rs = pstmt.executeQuery();
-
-		Statement stmt = mConnection.createStatement();
 		//Multiple results
 		while(rs.next()) {
 			//Get the block
@@ -292,7 +287,6 @@ public class MySQLConnect {
 			stmt.execute(res_query);
 		}
 		stmt.close();
-		pstmt.close();
 	}
 
 	public void createIndexes() throws SQLException {
@@ -305,24 +299,20 @@ public class MySQLConnect {
 	}
 
 	public void saveIndexes() throws SQLException {
-		PreparedStatement pstmt = mConnection.prepareStatement(
+
+		Statement stmt = mConnection.createStatement();
+
+		//Run the query
+		ResultSet rs = stmt.executeQuery(
 				" SET SESSION group_concat_max_len=10240;"
 			+ " SELECT CONCAT('ALTER TABLE ', `Table`, ' ADD INDEX ', GROUP_CONCAT(CONCAT(`Index`, '(', `Columns`, ')') SEPARATOR ', ADD INDEX '),';' ) AS sql_indexes"
 			+ " FROM ("
 			+ " SELECT table_name AS `Table`,"
 			+ "        index_name AS `Index`"
 			+ " FROM information_schema.statistics"
-			+ " WHERE NON_UNIQUE = 1 AND table_schema = '?'"
+			+ " WHERE NON_UNIQUE = 1 AND table_schema = '"+mDatabase+"'"
 			+ " GROUP BY `Table`, `Index`) AS tmp"
 			+ " GROUP BY `Table`");
-
-		//Set search params
-		pstmt.clearParameters();
-
-		pstmt.setString(1, mDatabase);
-
-		//Run the query
-		ResultSet rs = pstmt.executeQuery();
 
 		//Multiple results
 		while(rs.next()) {
@@ -333,7 +323,7 @@ public class MySQLConnect {
 			mIndexes.add(res_query);
 		}
 
-		pstmt.close();
+		stmt.close();
 	}
 
 	public boolean saveCascade(Cascade zCascade) throws SQLException {
