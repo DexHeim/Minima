@@ -37,6 +37,8 @@ public class MySQLConnect {
 	String mUsername;
 	String mPassword;
 
+	ArrayList<String> mIndexes = ArrayList<>;
+
 	Connection mConnection;
 
 	/**
@@ -137,8 +139,8 @@ public class MySQLConnect {
 						+ "  `txpowid` varchar(80) NOT NULL,"
 						+ "  `txpowid_txn` varchar(80) NOT NULL,"
 						+ "  PRIMARY KEY(`id`),"
-						+ "  FULLTEXT INDEX `idx_txpowidlist_txpowid` (`txpowid`),"
-						+ "  FULLTEXT INDEX `idx_txpowidlist_txpowid_txn` (`txpowid_txn`),"
+						+ "  INDEX `idx_txpowidlist_txpowid` (`txpowid`),"
+						+ "  INDEX `idx_txpowidlist_txpowid_txn` (`txpowid_txn`),"
 						+ "  CONSTRAINT `uidx_txpowidlist_txpowid_txpowid_txn` UNIQUE(`txpowid`, `txpowid_txn`)"
 						+ ")";
 
@@ -151,8 +153,8 @@ public class MySQLConnect {
 						+ "  `txpowid` varchar(80) NOT NULL,"
 						+ "  `coinid` varchar(80) NOT NULL,"
 						+ "  PRIMARY KEY(`id`),"
-						+ "  FULLTEXT INDEX `idx_txpow_coin_txpowid` (`txpowid`),"
-						+ "  FULLTEXT INDEX `idx_txpow_coin_coinid` (`coinid`),"
+						+ "  INDEX `idx_txpow_coin_txpowid` (`txpowid`),"
+						+ "  INDEX `idx_txpow_coin_coinid` (`coinid`),"
 						+ "  CONSTRAINT `uidx_txpow_coin_txpowid_coinid` UNIQUE(`txpowid`, `coinid`)"
 						+ ")";
 
@@ -170,8 +172,8 @@ public class MySQLConnect {
 						+ "  `mmrentry` varchar(20) NOT NULL,"
 						+ "  `created` bigint NOT NULL,"
 						+ "  PRIMARY KEY (`id`),"
-						+ "  FULLTEXT INDEX `idx_coins_address` (`address`),"
-						+ "  FULLTEXT INDEX `idx_coins_miniaddress` (`miniaddress`),"
+						+ "  INDEX `idx_coins_address` (`address`),"
+						+ "  INDEX `idx_coins_miniaddress` (`miniaddress`),"
 						+ "  CONSTRAINT `uidx_coins_coinid` UNIQUE(`coinid`)"
 						+ ")";
 
@@ -196,7 +198,7 @@ public class MySQLConnect {
 						+ "  `script` text NOT NULL,"
 						+ "  `created` bigint NOT NULL,"
 						+ "  PRIMARY KEY (`id`),"
-						+ "  FULLTEXT INDEX `idx_tokens_coinid` (`coinid`),"
+						+ "  INDEX `idx_tokens_coinid` (`coinid`),"
 						+ "  CONSTRAINT `uidx_tokens_tokenid` UNIQUE(`tokenid`)"
 						+ ")";
 
@@ -256,6 +258,79 @@ public class MySQLConnect {
 		stmt.execute("DROP TABLE tokens");
 
 		stmt.close();
+	}
+
+	public void deleteIndexes(String tbl_name) throws SQLException {
+		PreparedStatement pstmt = mConnection.prepareStatement(
+				" SET SESSION group_concat_max_len=10240;"
+			+ " SELECT CONCAT('ALTER TABLE ', `Table`, ' DROP INDEX ', GROUP_CONCAT(`Index` SEPARATOR ', DROP INDEX '),';' ) AS sql_indexes"
+			+ " FROM ("
+			+ " SELECT table_name AS `Table`,"
+			+ "        index_name AS `Index`"
+			+ " FROM information_schema.statistics"
+			+ " WHERE NON_UNIQUE = 1 AND table_schema = '?'"
+			+ " GROUP BY `Table`, `Index`) AS tmp";
+			+ " GROUP BY `Table`");
+
+		//Set search params
+		pstmt.clearParameters();
+
+		pstmt.setString(1, mDatabase);
+
+		//Run the query
+		ResultSet rs = pstmt.executeQuery();
+
+		Statement stmt = mConnection.createStatement();
+		//Multiple results
+		while(rs.next()) {
+			//Get the block
+			String res_query = rs.getString("sql_indexes");
+
+			stmt.execute(res_query);
+		}
+		stmt.close();
+		pstmt.close();
+	}
+
+	public void createIndexes() throws SQLException {
+		Statement stmt = mConnection.createStatement();
+
+		for (String sql_index : mIndexes)
+			stmt.execute(sql_index);
+
+		stmt.close();
+	}
+
+	public void saveIndexes() throws SQLException {
+		PreparedStatement pstmt = mConnection.prepareStatement(
+				" SET SESSION group_concat_max_len=10240;"
+			+ " SELECT CONCAT('ALTER TABLE ', `Table`, ' ADD INDEX ', GROUP_CONCAT(CONCAT(`Index`, '(', `Columns`, ')') SEPARATOR ', ADD INDEX '),';' ) AS sql_indexes"
+			+ " FROM ("
+			+ " SELECT table_name AS `Table`,"
+			+ "        index_name AS `Index`"
+			+ " FROM information_schema.statistics"
+			+ " WHERE NON_UNIQUE = 1 AND table_schema = '?'"
+			+ " GROUP BY `Table`, `Index`) AS tmp";
+			+ " GROUP BY `Table`");
+
+		//Set search params
+		pstmt.clearParameters();
+
+		pstmt.setString(1, mDatabase);
+
+		//Run the query
+		ResultSet rs = pstmt.executeQuery();
+
+		//Multiple results
+		while(rs.next()) {
+
+			//Get the block
+			String res_query = rs.getString("sql_indexes");
+
+			mIndexes.add(res_query);
+		}
+
+		pstmt.close();
 	}
 
 	public boolean saveCascade(Cascade zCascade) throws SQLException {
