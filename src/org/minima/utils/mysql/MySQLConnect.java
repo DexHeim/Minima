@@ -108,7 +108,7 @@ public class MySQLConnect {
 						+ "  `txpowid` varchar(80) NOT NULL,"
 						+ "  `superblock` int NOT NULL,"
 						+ "  `size` bigint NOT NULL,"
-						+ "  `burn` decimal(20,44) DEFAULT 0 NOT NULL,"
+						+ "  `burn` varchar(64) DEFAULT '0' NOT NULL,"
 						+ "  PRIMARY KEY(`id`),"
 						+ "  CONSTRAINT `uidx_txpow_txpowid` UNIQUE(`txpowid`)"
 						+ ")";
@@ -168,7 +168,7 @@ public class MySQLConnect {
 		String coins = "CREATE TABLE IF NOT EXISTS `coins` ("
 						+ "  `id` int NOT NULL AUTO_INCREMENT,"
 						+ "  `coinid` varchar(80) NOT NULL,"
-						+ "  `amount` decimal(20,44) NOT NULL,"
+						+ "  `amount` varchar(64) NOT NULL,"
 						+ "  `address` varchar(80) NOT NULL,"
 						+ "  `miniaddress` varchar(80) NOT NULL,"
 						+ "  `tokenid` varchar(80) NOT NULL,"
@@ -195,7 +195,7 @@ public class MySQLConnect {
 						+ "  `webvalidate` varchar(1000) NULL,"
 						+ "  `object` text NULL,"
 						+ "  `total` bigint NOT NULL,"
-						+ "  `totalamount` decimal(20,44) NOT NULL,"
+						+ "  `totalamount` varchar(64) NOT NULL,"
 						+ "  `decimals` int NOT NULL,"
 						+ "  `scale` int NOT NULL,"
 						+ "  `script` text NOT NULL,"
@@ -308,18 +308,6 @@ public class MySQLConnect {
 
 		Statement stmt = mConnection.createStatement();
 
-		/*
-		String buffSql = "SET SESSION group_concat_max_len=10240;"
-			+ " SELECT CONCAT('ALTER TABLE ', `Table`, ' ADD INDEX ', GROUP_CONCAT(CONCAT(`Index`, '(', `Columns`, ')') SEPARATOR ', ADD INDEX '),';' ) AS sql_indexes"
-			+ " FROM ("
-			+ " SELECT table_name AS `Table`,"
-			+ "        index_name AS `Index`,"
-			+ " 			 GROUP_CONCAT(column_name ORDER BY seq_in_index) AS `Columns`"
-			+ " FROM information_schema.statistics"
-			+ " WHERE NON_UNIQUE = 1 AND table_schema = '"+mDatabase+"'"
-			+ " GROUP BY `Table`, `Index`) AS tmp"
-			+ " GROUP BY `Table`;";
-		*/
 		String buffSql = " SELECT CONCAT('ALTER TABLE ', tbl_name, ' ADD INDEX ', GROUP_CONCAT(CONCAT(tbl_index, '(', tbl_cols, ')') SEPARATOR ', ADD INDEX '),';' ) AS sql_indexes "
 			+ " FROM ( SELECT table_name AS tbl_name, "
 			+ "	 		index_name AS tbl_index, "
@@ -419,7 +407,7 @@ public class MySQLConnect {
 			SQL_INSERT_TXPOW.setString(1, blockTxPoW.getTxPoWID());
 			SQL_INSERT_TXPOW.setInt(2, blockTxPoW.getSuperLevel());
 			SQL_INSERT_TXPOW.setLong(3, blockTxPoW.getSizeinBytes());
-			SQL_INSERT_TXPOW.setBigDecimal(4, blockTxPoW.getBurn().getAsBigDecimal());
+			SQL_INSERT_TXPOW.setString(4, blockTxPoW.getBurn().toString());
 
 			//Do it.
 			SQL_INSERT_TXPOW.execute();
@@ -456,7 +444,7 @@ public class MySQLConnect {
 				SQL_INSERT_COIN.clearParameters();
 
 				SQL_INSERT_COIN.setString(1, cc.getCoinID().to0xString());
-				SQL_INSERT_COIN.setBigDecimal(2, cc.getAmount().getAsBigDecimal());
+				SQL_INSERT_COIN.setString(2, cc.getAmount().toString());
 				SQL_INSERT_COIN.setString(3, cc.getAddress().to0xString());
 				SQL_INSERT_COIN.setString(4, Address.makeMinimaAddress(cc.getAddress()));
 				SQL_INSERT_COIN.setString(5, cc.getTokenID().to0xString());
@@ -485,7 +473,7 @@ public class MySQLConnect {
 				Coin buffCoin = incoin.getCoin();
 
 				SQL_INSERT_COIN.setString(1, buffCoin.getCoinID().to0xString());
-				SQL_INSERT_COIN.setBigDecimal(2, buffCoin.getAmount().getAsBigDecimal());
+				SQL_INSERT_COIN.setString(2, buffCoin.getAmount().toString());
 				SQL_INSERT_COIN.setString(3, buffCoin.getAddress().to0xString());
 				SQL_INSERT_COIN.setString(4, Address.makeMinimaAddress(buffCoin.getAddress()));
 				SQL_INSERT_COIN.setString(5, buffCoin.getTokenID().to0xString());
@@ -539,7 +527,7 @@ public class MySQLConnect {
 						SQL_INSERT_TOKEN.setString(3, buffToken.getName().toString());
 					}
 					SQL_INSERT_TOKEN.setLong(9, buffToken.getTotalTokens().getAsLong());
-					SQL_INSERT_TOKEN.setBigDecimal(10, buffToken.getAmount().getAsBigDecimal());
+					SQL_INSERT_TOKEN.setLong(10, buffToken.getAmount().getAsLong());
 					SQL_INSERT_TOKEN.setInt(11, buffToken.getDecimalPlaces().getAsInt());
 					SQL_INSERT_TOKEN.setInt(12, buffToken.getScale().getAsInt());
 					SQL_INSERT_TOKEN.setString(13, buffToken.getTokenScript().toString());
