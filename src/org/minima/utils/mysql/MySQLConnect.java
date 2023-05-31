@@ -59,7 +59,6 @@ public class MySQLConnect {
 	PreparedStatement SQL_INSERT_TXPOW				= null;
 	PreparedStatement SQL_INSERT_TXHEADER			= null;
 	PreparedStatement SQL_INSERT_TXPOWIDLIST	= null;
-	PreparedStatement SQL_INSERT_TXPOWCOIN		= null;
 	PreparedStatement SQL_INSERT_COIN					= null;
 	PreparedStatement SQL_INSERT_COIN_STATE		= null;
 	PreparedStatement SQL_INSERT_TOKEN				= null;
@@ -152,23 +151,10 @@ public class MySQLConnect {
 		//Run it..
 		stmt.execute(tbl_txpowidlist);
 
-		//Create the TxPoW-Coin link
-		String tbl_txpow_coin = "CREATE TABLE IF NOT EXISTS `txpow_coin` ("
-						+ "  `id` int NOT NULL AUTO_INCREMENT,"
-						+ "  `txpowid` varchar(80) NOT NULL,"
-						+ "  `coinid` varchar(80) NOT NULL,"
-						+ "  PRIMARY KEY(`id`),"
-						+ "  INDEX `idx_txpow_coin_txpowid` (`txpowid`),"
-						+ "  INDEX `idx_txpow_coin_coinid` (`coinid`),"
-						+ "  CONSTRAINT `uidx_txpow_coin_txpowid_coinid` UNIQUE(`txpowid`, `coinid`)"
-						+ ")";
-
-		//Run it..
-		stmt.execute(tbl_txpow_coin);
-
 		//Create the coin table
 		String coin = "CREATE TABLE IF NOT EXISTS `coin` ("
 						+ "  `id` int NOT NULL AUTO_INCREMENT,"
+						+ "  `txpowid` varchar(80) NOT NULL,"
 						+ "  `coinid` varchar(80) NOT NULL,"
 						+ "  `amount` varchar(64) NOT NULL,"
 						+ "  `address` varchar(80) NOT NULL,"
@@ -177,9 +163,11 @@ public class MySQLConnect {
 						+ "  `mmrentry` varchar(20) NOT NULL,"
 						+ "  `created` bigint NOT NULL,"
 						+ "  PRIMARY KEY (`id`),"
+						+ "  INDEX `idx_coin_coinid` (`coinid`),"
 						+ "  INDEX `idx_coin_address` (`address`),"
 						+ "  INDEX `idx_coin_miniaddress` (`miniaddress`),"
-						+ "  CONSTRAINT `uidx_coin_coinid` UNIQUE(`coinid`)"
+						+ "  INDEX `idx_coin_txpowid` (`txpowid`),"
+						+ "  CONSTRAINT `uidx_coin_coinid` UNIQUE(`coinid`, `txpowid`)"
 						+ ")";
 
 		//Run it..
@@ -247,9 +235,8 @@ public class MySQLConnect {
 		SQL_INSERT_TXHEADER 	= mConnection.prepareStatement(insert_txheader);
 
 		SQL_INSERT_TXPOWIDLIST 	= mConnection.prepareStatement("INSERT INTO txpowidlist ( txpowid, txpowid_txn ) VALUES ( ?, ? )");
-		SQL_INSERT_TXPOWCOIN 	= mConnection.prepareStatement("INSERT INTO txpow_coin ( txpowid, coinid ) VALUES ( ?, ? )");
 
-		String insert_coin = "INSERT IGNORE INTO coin ( coinid, amount, address, miniaddress, tokenid, mmrentry, created ) VALUES ( ?, ?, ?, ?, ?, ?, ? )";
+		String insert_coin = "INSERT IGNORE INTO coin ( txpowid, coinid, amount, address, miniaddress, tokenid, mmrentry, created ) VALUES ( ?, ?, ?, ?, ?, ?, ?, ? )";
 		SQL_INSERT_COIN 	= mConnection.prepareStatement(insert_coin);
 
 		SQL_INSERT_COIN_STATE = mConnection.prepareStatement("INSERT INTO coin_state ( coinid, port, type, data ) VALUES ( ?, ?, ?, ? )");
@@ -463,23 +450,17 @@ public class MySQLConnect {
 			for(Coin cc : outputs) {
 				SQL_INSERT_COIN.clearParameters();
 
-				SQL_INSERT_COIN.setString(1, cc.getCoinID().to0xString());
-				SQL_INSERT_COIN.setString(2, cc.getAmount().toString());
-				SQL_INSERT_COIN.setString(3, cc.getAddress().to0xString());
-				SQL_INSERT_COIN.setString(4, Address.makeMinimaAddress(cc.getAddress()));
-				SQL_INSERT_COIN.setString(5, cc.getTokenID().to0xString());
-				SQL_INSERT_COIN.setString(6, cc.getMMREntryNumber().toString());
-				SQL_INSERT_COIN.setLong(7, cc.getBlockCreated().getAsLong());
+				SQL_INSERT_COIN.setString(1, blockTxPoW.getTxPoWID());
+				SQL_INSERT_COIN.setString(2, cc.getCoinID().to0xString());
+				SQL_INSERT_COIN.setString(3, cc.getAmount().toString());
+				SQL_INSERT_COIN.setString(4, cc.getAddress().to0xString());
+				SQL_INSERT_COIN.setString(5, Address.makeMinimaAddress(cc.getAddress()));
+				SQL_INSERT_COIN.setString(6, cc.getTokenID().to0xString());
+				SQL_INSERT_COIN.setString(7, cc.getMMREntryNumber().toString());
+				SQL_INSERT_COIN.setLong(8, cc.getBlockCreated().getAsLong());
 
 				//Do it.
 				SQL_INSERT_COIN.execute();
-
-				//Store link TxPoW-Coin
-				SQL_INSERT_TXPOWCOIN.setString(1, blockTxPoW.getTxPoWID());
-				SQL_INSERT_TXPOWCOIN.setString(2, cc.getCoinID().to0xString());
-
-				//Do it.
-				SQL_INSERT_TXPOWCOIN.execute();
 			}
 
 			// Spent coins
@@ -492,13 +473,14 @@ public class MySQLConnect {
 
 				Coin buffCoin = incoin.getCoin();
 
-				SQL_INSERT_COIN.setString(1, buffCoin.getCoinID().to0xString());
-				SQL_INSERT_COIN.setString(2, buffCoin.getAmount().toString());
-				SQL_INSERT_COIN.setString(3, buffCoin.getAddress().to0xString());
-				SQL_INSERT_COIN.setString(4, Address.makeMinimaAddress(buffCoin.getAddress()));
-				SQL_INSERT_COIN.setString(5, buffCoin.getTokenID().to0xString());
-				SQL_INSERT_COIN.setString(6, buffCoin.getMMREntryNumber().toString());
-				SQL_INSERT_COIN.setLong(7, buffCoin.getBlockCreated().getAsLong());
+				SQL_INSERT_COIN.setString(1, blockTxPoW.getTxPoWID());
+				SQL_INSERT_COIN.setString(2, buffCoin.getCoinID().to0xString());
+				SQL_INSERT_COIN.setString(3, buffCoin.getAmount().toString());
+				SQL_INSERT_COIN.setString(4, buffCoin.getAddress().to0xString());
+				SQL_INSERT_COIN.setString(5, Address.makeMinimaAddress(buffCoin.getAddress()));
+				SQL_INSERT_COIN.setString(6, buffCoin.getTokenID().to0xString());
+				SQL_INSERT_COIN.setString(7, buffCoin.getMMREntryNumber().toString());
+				SQL_INSERT_COIN.setLong(8, buffCoin.getBlockCreated().getAsLong());
 
 				//Do it.
 				SQL_INSERT_COIN.execute();
