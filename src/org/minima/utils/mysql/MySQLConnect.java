@@ -285,8 +285,10 @@ public class MySQLConnect {
 			res_queries.add(rs.getString("sql_indexes"));
 
 		//Exec all queries
-		for (String res_query : res_queries)
+		for (String res_query : res_queries) {
+			MinimaLogger.log(res_query);
 			stmt.execute(res_query);
+		}
 
 		stmt.close();
 	}
@@ -294,8 +296,10 @@ public class MySQLConnect {
 	public void createIndexes() throws SQLException {
 		Statement stmt = mConnection.createStatement();
 
-		for (String sql_index : mIndexes)
+		for (String sql_index : mIndexes) {
+			MinimaLogger.log(sql_index);
 			stmt.execute(sql_index);
+		}
 
 		stmt.close();
 	}
