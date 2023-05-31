@@ -279,7 +279,7 @@ public class MySQLConnect {
 		//Run the query
 		ResultSet rs = stmt.executeQuery(buffSql);
 
-		ArrayList<String> res_queries = new ArrayList<>;
+		ArrayList<String> res_queries = new ArrayList<>();
 		//Multiple results
 		while(rs.next())
 			res_queries.Add(rs.getString("sql_indexes"));
