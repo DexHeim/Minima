@@ -419,7 +419,7 @@ public class MySQLConnect {
 			SQL_INSERT_TXPOW.setString(1, blockTxPoW.getTxPoWID());
 			SQL_INSERT_TXPOW.setInt(2, blockTxPoW.getSuperLevel());
 			SQL_INSERT_TXPOW.setLong(3, blockTxPoW.getSizeinBytes());
-			SQL_INSERT_TXPOW.setFloat(4, blockTxPoW.getBurn().getAsBigDecimal());
+			SQL_INSERT_TXPOW.setBigDecimal(4, blockTxPoW.getBurn().getAsBigDecimal());
 
 			//Do it.
 			SQL_INSERT_TXPOW.execute();
@@ -456,7 +456,7 @@ public class MySQLConnect {
 				SQL_INSERT_COIN.clearParameters();
 
 				SQL_INSERT_COIN.setString(1, cc.getCoinID().to0xString());
-				SQL_INSERT_COIN.setObject(2, cc.getAmount().getAsBigDecimal(), java.sql.Types.FLOAT);
+				SQL_INSERT_COIN.setBigDecimal(2, cc.getAmount().getAsBigDecimal());
 				SQL_INSERT_COIN.setString(3, cc.getAddress().to0xString());
 				SQL_INSERT_COIN.setString(4, Address.makeMinimaAddress(cc.getAddress()));
 				SQL_INSERT_COIN.setString(5, cc.getTokenID().to0xString());
@@ -485,7 +485,7 @@ public class MySQLConnect {
 				Coin buffCoin = incoin.getCoin();
 
 				SQL_INSERT_COIN.setString(1, buffCoin.getCoinID().to0xString());
-				SQL_INSERT_COIN.setObject(2, buffCoin.getAmount().getAsBigDecimal(), java.sql.Types.FLOAT);
+				SQL_INSERT_COIN.setBigDecimal(2, buffCoin.getAmount().getAsBigDecimal());
 				SQL_INSERT_COIN.setString(3, buffCoin.getAddress().to0xString());
 				SQL_INSERT_COIN.setString(4, Address.makeMinimaAddress(buffCoin.getAddress()));
 				SQL_INSERT_COIN.setString(5, buffCoin.getTokenID().to0xString());
@@ -539,7 +539,7 @@ public class MySQLConnect {
 						SQL_INSERT_TOKEN.setString(3, buffToken.getName().toString());
 					}
 					SQL_INSERT_TOKEN.setLong(9, buffToken.getTotalTokens().getAsLong());
-					SQL_INSERT_TOKEN.setObject(10, buffToken.getAmount().getAsBigDecimal(), java.sql.Types.FLOAT);
+					SQL_INSERT_TOKEN.setBigDecimal(10, buffToken.getAmount().getAsBigDecimal());
 					SQL_INSERT_TOKEN.setInt(11, buffToken.getDecimalPlaces().getAsInt());
 					SQL_INSERT_TOKEN.setInt(12, buffToken.getScale().getAsInt());
 					SQL_INSERT_TOKEN.setString(13, buffToken.getTokenScript().toString());
