@@ -267,9 +267,7 @@ public class MySQLConnect {
 
 		Statement stmt = mConnection.createStatement();
 
-		//Run the query
-		ResultSet rs = stmt.executeQuery(
-				" SET SESSION group_concat_max_len=10240;"
+		String buffSql = " SET SESSION group_concat_max_len=10240;"
 			+ " SELECT CONCAT('ALTER TABLE ', tbl_name, ' DROP INDEX ', GROUP_CONCAT(tbl_index SEPARATOR ', DROP INDEX '),';' ) AS sql_indexes"
 			+ " FROM ("
 			+ " SELECT table_name AS tbl_name,"
@@ -277,7 +275,12 @@ public class MySQLConnect {
 			+ " FROM information_schema.statistics"
 			+ " WHERE NON_UNIQUE = 1 AND table_schema = '"+mDatabase+"'"
 			+ " GROUP BY tbl_name, tbl_index) AS tmp"
-			+ " GROUP BY tbl_name");
+			+ " GROUP BY tbl_name;";
+
+		MinimaLogger.log(buffSql);
+		
+		//Run the query
+		ResultSet rs = stmt.executeQuery(buffSql);
 
 		//Multiple results
 		while(rs.next()) {
@@ -302,9 +305,7 @@ public class MySQLConnect {
 
 		Statement stmt = mConnection.createStatement();
 
-		//Run the query
-		ResultSet rs = stmt.executeQuery(
-				" SET SESSION group_concat_max_len=10240;"
+		String buffSql = " SET SESSION group_concat_max_len=10240;"
 			+ " SELECT CONCAT('ALTER TABLE ', tbl_name, ' ADD INDEX ', GROUP_CONCAT(CONCAT(tbl_index, '(', tbl_col, ')') SEPARATOR ', ADD INDEX '),';' ) AS sql_indexes"
 			+ " FROM ("
 			+ " SELECT table_name AS tbl_name,"
@@ -313,7 +314,12 @@ public class MySQLConnect {
 			+ " FROM information_schema.statistics"
 			+ " WHERE NON_UNIQUE = 1 AND table_schema = '"+mDatabase+"'"
 			+ " GROUP BY tbl_name, tbl_ndex) AS tmp"
-			+ " GROUP BY tbl_name");
+			+ " GROUP BY tbl_name;";
+
+		MinimaLogger.log(buffSql);
+
+		//Run the query
+		ResultSet rs = stmt.executeQuery(buffSql);
 
 		//Multiple results
 		while(rs.next()) {
