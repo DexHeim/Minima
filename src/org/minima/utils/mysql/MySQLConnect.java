@@ -508,7 +508,7 @@ public class MySQLConnect {
 					for (StateVariable coin_state : buffCoin.getState()) {
 						SQL_INSERT_COIN_STATE.setInt(1, coin_state.getPort());
 						SQL_INSERT_COIN_STATE.setInt(2, coin_state.getType().getValue());
-						SQL_INSERT_COIN_STATE.setStringc(3, coin_state.getData().toString());
+						SQL_INSERT_COIN_STATE.setString(3, coin_state.getData().toString());
 
 						//Do it.
 						SQL_INSERT_COIN_STATE.execute();
