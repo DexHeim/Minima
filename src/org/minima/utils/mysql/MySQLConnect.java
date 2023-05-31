@@ -313,7 +313,7 @@ public class MySQLConnect {
 			+ " 			 GROUP_CONCAT(column_name ORDER BY seq_in_index) AS `Columns`"
 			+ " FROM information_schema.statistics"
 			+ " WHERE NON_UNIQUE = 1 AND table_schema = '"+mDatabase+"'"
-			+ " GROUP BY `Table`, tbl_ndex) AS tmp"
+			+ " GROUP BY `Table`, `Index`) AS tmp"
 			+ " GROUP BY `Table`;";
 
 		MinimaLogger.log(buffSql);
