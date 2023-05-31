@@ -270,14 +270,14 @@ public class MySQLConnect {
 		//Run the query
 		ResultSet rs = stmt.executeQuery(
 				" SET SESSION group_concat_max_len=10240;"
-			+ " SELECT CONCAT('ALTER TABLE ', `Table`, ' DROP INDEX ', GROUP_CONCAT(`Index` SEPARATOR ', DROP INDEX '),';' ) AS sql_indexes"
+			+ " SELECT CONCAT('ALTER TABLE ', tbl_name, ' DROP INDEX ', GROUP_CONCAT(tbl_index SEPARATOR ', DROP INDEX '),';' ) AS sql_indexes"
 			+ " FROM ("
-			+ " SELECT table_name AS `Table`,"
-			+ "        index_name AS `Index`"
+			+ " SELECT table_name AS tbl_name,"
+			+ "        index_name AS tbl_index"
 			+ " FROM information_schema.statistics"
 			+ " WHERE NON_UNIQUE = 1 AND table_schema = '"+mDatabase+"'"
-			+ " GROUP BY `Table`, `Index`) AS tmp"
-			+ " GROUP BY `Table`");
+			+ " GROUP BY tbl_name, tbl_index) AS tmp"
+			+ " GROUP BY tbl_name");
 
 		//Multiple results
 		while(rs.next()) {
@@ -305,14 +305,15 @@ public class MySQLConnect {
 		//Run the query
 		ResultSet rs = stmt.executeQuery(
 				" SET SESSION group_concat_max_len=10240;"
-			+ " SELECT CONCAT('ALTER TABLE ', `Table`, ' ADD INDEX ', GROUP_CONCAT(CONCAT(`Index`, '(', `Columns`, ')') SEPARATOR ', ADD INDEX '),';' ) AS sql_indexes"
+			+ " SELECT CONCAT('ALTER TABLE ', tbl_name, ' ADD INDEX ', GROUP_CONCAT(CONCAT(tbl_index, '(', tbl_col, ')') SEPARATOR ', ADD INDEX '),';' ) AS sql_indexes"
 			+ " FROM ("
-			+ " SELECT table_name AS `Table`,"
-			+ "        index_name AS `Index`"
+			+ " SELECT table_name AS tbl_name,"
+			+ "        index_name AS tbl_index,"
+			+ " 			 GROUP_CONCAT(column_name ORDER BY seq_in_index) AS tbl_col"
 			+ " FROM information_schema.statistics"
 			+ " WHERE NON_UNIQUE = 1 AND table_schema = '"+mDatabase+"'"
-			+ " GROUP BY `Table`, `Index`) AS tmp"
-			+ " GROUP BY `Table`");
+			+ " GROUP BY tbl_name, tbl_ndex) AS tmp"
+			+ " GROUP BY tbl_name");
 
 		//Multiple results
 		while(rs.next()) {
