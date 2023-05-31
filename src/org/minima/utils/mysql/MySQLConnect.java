@@ -37,7 +37,7 @@ public class MySQLConnect {
 	String mUsername;
 	String mPassword;
 
-	ArrayList<String> mIndexes = ArrayList<>;
+	ArrayList<String> mIndexes;
 
 	Connection mConnection;
 
@@ -70,6 +70,9 @@ public class MySQLConnect {
 	}
 
 	public void init() throws SQLException {
+		//Init variable
+		mIndexes = ArrayList<>;
+
 		//MYSQL JDBC connection
 		String mysqldb = "jdbc:mysql://"+mMySQLHost+"/"+mDatabase+"?autoReconnect=true";
 
@@ -269,7 +272,7 @@ public class MySQLConnect {
 			+ "        index_name AS `Index`"
 			+ " FROM information_schema.statistics"
 			+ " WHERE NON_UNIQUE = 1 AND table_schema = '?'"
-			+ " GROUP BY `Table`, `Index`) AS tmp";
+			+ " GROUP BY `Table`, `Index`) AS tmp"
 			+ " GROUP BY `Table`");
 
 		//Set search params
@@ -310,7 +313,7 @@ public class MySQLConnect {
 			+ "        index_name AS `Index`"
 			+ " FROM information_schema.statistics"
 			+ " WHERE NON_UNIQUE = 1 AND table_schema = '?'"
-			+ " GROUP BY `Table`, `Index`) AS tmp";
+			+ " GROUP BY `Table`, `Index`) AS tmp"
 			+ " GROUP BY `Table`");
 
 		//Set search params
