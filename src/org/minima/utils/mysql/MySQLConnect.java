@@ -263,7 +263,7 @@ public class MySQLConnect {
 		stmt.close();
 	}
 
-	public void deleteIndexes(String tbl_name) throws SQLException {
+	public void deleteIndexes() throws SQLException {
 		PreparedStatement pstmt = mConnection.prepareStatement(
 				" SET SESSION group_concat_max_len=10240;"
 			+ " SELECT CONCAT('ALTER TABLE ', `Table`, ' DROP INDEX ', GROUP_CONCAT(`Index` SEPARATOR ', DROP INDEX '),';' ) AS sql_indexes"
