@@ -124,7 +124,7 @@ public class MySQLConnect {
 						+ "  `nonce` varchar(80) NOT NULL,"
 						+ "  `timemilli` bigint NOT NULL,"
 						+ "  PRIMARY KEY(`id`),"
-						+ "  FULLTEXT INDEX `idx_txheader_block` (`block`),"
+						+ "  INDEX `idx_txheader_block` (`block`),"
 						+ "  CONSTRAINT `uidx_txheader_txpowid` UNIQUE(`txpowid`)"
 						+ ")";
 
