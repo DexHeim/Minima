@@ -177,6 +177,7 @@ public class MySQLConnect {
 						+ "  `mmrentry` varchar(20) NOT NULL,"
 						+ "  `created` bigint NOT NULL,"
 						+ "  PRIMARY KEY (`id`),"
+						+ "  INDEX `idx_coin_coinid` (`coinid`),"
 						+ "  INDEX `idx_coin_address` (`address`),"
 						+ "  INDEX `idx_coin_miniaddress` (`miniaddress`),"
 						+ "  CONSTRAINT `uidx_coin_coinid` UNIQUE(`coinid`)"
