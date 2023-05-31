@@ -249,7 +249,7 @@ public class MySQLConnect {
 		SQL_INSERT_TXPOWIDLIST 	= mConnection.prepareStatement("INSERT INTO txpowidlist ( txpowid, txpowid_txn ) VALUES ( ?, ? )");
 		SQL_INSERT_TXPOWCOIN 	= mConnection.prepareStatement("INSERT INTO txpow_coin ( txpowid, coinid ) VALUES ( ?, ? )");
 
-		String insert_coin = "INSERT INTO coin ( coinid, amount, address, miniaddress, tokenid, mmrentry, created ) VALUES ( ?, ?, ?, ?, ?, ?, ? ) AS new ON DUPLICATE KEY UPDATE mmrentry = new.mmrentry, created = new.created";
+		String insert_coin = "INSERT IGNORE INTO coin ( coinid, amount, address, miniaddress, tokenid, mmrentry, created ) VALUES ( ?, ?, ?, ?, ?, ?, ? )";
 		SQL_INSERT_COIN 	= mConnection.prepareStatement(insert_coin);
 
 		SQL_INSERT_COIN_STATE = mConnection.prepareStatement("INSERT INTO coin_state ( coinid, port, type, data ) VALUES ( ?, ?, ?, ? )");
