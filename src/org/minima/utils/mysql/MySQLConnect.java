@@ -71,7 +71,7 @@ public class MySQLConnect {
 
 	public void init() throws SQLException {
 		//Init variable
-		mIndexes = ArrayList<>;
+		mIndexes = new ArrayList<>();
 
 		//MYSQL JDBC connection
 		String mysqldb = "jdbc:mysql://"+mMySQLHost+"/"+mDatabase+"?autoReconnect=true";
