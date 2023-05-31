@@ -317,8 +317,7 @@ public class MySQLConnect {
 			+ " GROUP BY `Table`, `Index`) AS tmp"
 			+ " GROUP BY `Table`;";
 		*/
-		String buffSql = "SET SESSION group_concat_max_len=10240; "
-			+ " SELECT CONCAT('ALTER TABLE ', tbl_name, ' ADD INDEX ', GROUP_CONCAT(CONCAT(tbl_index, '(', tbl_cols, ')') SEPARATOR ', ADD INDEX '),';' ) AS sql_indexes "
+		String buffSql = " SELECT CONCAT('ALTER TABLE ', tbl_name, ' ADD INDEX ', GROUP_CONCAT(CONCAT(tbl_index, '(', tbl_cols, ')') SEPARATOR ', ADD INDEX '),';' ) AS sql_indexes "
 			+ " FROM ( SELECT table_name AS tbl_name, "
 			+ "	 		index_name AS tbl_index, "
 			+ "	 		GROUP_CONCAT(column_name ORDER BY seq_in_index) AS tbl_cols "
