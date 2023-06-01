@@ -513,11 +513,11 @@ public class MySQLConnect {
 			for(Coin cc : outputs) {
 
 				// Store coin
-				saveCoin(buffCoin);
+				saveCoin(cc);
 
 				// Store coin state
-				if (buffCoin.getState().size() > 0)
-					saveCoinState(buffCoin.getCoinID().to0xString(), buffCoin.getState());
+				if (cc.getState().size() > 0)
+					saveCoinState(cc.getCoinID().to0xString(), cc.getState());
 
 				//Get the Query ready
 				SQL_INSERT_TXPOWCOIN.clearParameters();
