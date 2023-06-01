@@ -601,14 +601,15 @@ public class MySQLConnect {
 
 				//Do it.
 				SQL_INSERT_COIN_STATE.execute();
-
-				return true;
-
-			} catch (SQLException e) {
-				MinimaLogger.log(e);
 			}
 
-			return false;
+			return true;
+
+		} catch (SQLException e) {
+			MinimaLogger.log(e);
+		}
+
+		return false;
 	}
 
 	public synchronized boolean saveToken(Token zToken) {
