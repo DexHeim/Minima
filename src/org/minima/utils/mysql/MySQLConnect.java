@@ -64,6 +64,15 @@ public class MySQLConnect {
 	PreparedStatement SQL_INSERT_COIN_STATE		= null;
 	PreparedStatement SQL_INSERT_TOKEN				= null;
 
+	PreparedStatement SQL_DELETE_TXPOW				= null;
+	PreparedStatement SQL_DELETE_TXHEADER			= null;
+	PreparedStatement SQL_DELETE_TXPOWIDLIST	= null;
+	PreparedStatement SQL_DELETE_TXPOWCOIN		= null;
+	PreparedStatement SQL_DELETE_COIN					= null;
+	PreparedStatement SQL_DELETE_COIN_STATE		= null;
+
+	PreparedStatement SQL_SELECT_LAST_TXPOW		= null;
+
 	public MySQLConnect(String zHost, String zDatabase, String zUsername, String zPassword) {
 		mMySQLHost 	= zHost;
 		mDatabase	= zDatabase;
@@ -108,63 +117,19 @@ public class MySQLConnect {
 		String tbl_txpow = "CREATE TABLE IF NOT EXISTS `txpow` ("
 						+ "  `id` int NOT NULL AUTO_INCREMENT,"
 						+ "  `txpowid` varchar(80) NOT NULL,"
+						+ "  `block` bigint NOT NULL,"
 						+ "  `superblock` int NOT NULL,"
 						+ "  `size` bigint NOT NULL,"
 						+ "  `burn` varchar(64) DEFAULT '0' NOT NULL,"
+						+ "  `timemilli` bigint NOT NULL,"
 						+ "  PRIMARY KEY(`id`),"
-						+ "  CONSTRAINT `uidx_txpow_txpowid` UNIQUE(`txpowid`)"
+						+ "  INDEX `idx_txpow_txpowid` (`txpowid`),"
+						+ "  INDEX `idx_txpow_timemilli` (`timemilli`),"
+						+ "  CONSTRAINT `uidx_txpow_block` UNIQUE(`block`)"
 						+ ")";
 
 		//Run it..
 		stmt.execute(tbl_txpow);
-
-		//Create the TxHeader table (TxHeader model from TxBlock-TxPoW-TxHeader)
-		String tbl_txheader = "CREATE TABLE IF NOT EXISTS `txheader` ("
-						+ "  `id` int NOT NULL AUTO_INCREMENT,"
-						+ "  `txpowid` varchar(80) NOT NULL,"
-						+ "  `chainid` varchar(20) NOT NULL,"
-						+ "  `block` bigint NOT NULL,"
-						+ "  `blkdiff` varchar(80) NOT NULL,"
-						+ "  `mmr` varchar(80) NOT NULL,"
-						+ "  `total` bigint NOT NULL,"
-						+ "  `txbodyhash` varchar(80) NOT NULL,"
-						+ "  `nonce` varchar(80) NOT NULL,"
-						+ "  `timemilli` bigint NOT NULL,"
-						+ "  PRIMARY KEY(`id`),"
-						+ "  INDEX `idx_txheader_block` (`block`),"
-						+ "  CONSTRAINT `uidx_txheader_txpowid` UNIQUE(`txpowid`)"
-						+ ")";
-
-		//Run it..
-		stmt.execute(tbl_txheader);
-
-		//Create the TxPoW ID list (Transactions TxPoW ID list from TxBlock-TxPoW-TxBody-TxPowIDList)
-		String tbl_txpowidlist = "CREATE TABLE IF NOT EXISTS `txpowidlist` ("
-						+ "  `id` int NOT NULL AUTO_INCREMENT,"
-						+ "  `txpowid` varchar(80) NOT NULL,"
-						+ "  `txpowid_txn` varchar(80) NOT NULL,"
-						+ "  PRIMARY KEY(`id`),"
-						+ "  INDEX `idx_txpowidlist_txpowid` (`txpowid`),"
-						+ "  INDEX `idx_txpowidlist_txpowid_txn` (`txpowid_txn`),"
-						+ "  CONSTRAINT `uidx_txpowidlist_txpowid_txpowid_txn` UNIQUE(`txpowid`, `txpowid_txn`)"
-						+ ")";
-
-		//Run it..
-		stmt.execute(tbl_txpowidlist);
-
-		//Create the TxPoW-Coin link
-		String tbl_txpow_coin = "CREATE TABLE IF NOT EXISTS `txpow_coin` ("
-						+ "  `id` int NOT NULL AUTO_INCREMENT,"
-						+ "  `txpowid` varchar(80) NOT NULL,"
-						+ "  `coinid` varchar(80) NOT NULL,"
-						+ "  PRIMARY KEY(`id`),"
-						+ "  INDEX `idx_txpow_coin_txpowid` (`txpowid`),"
-						+ "  INDEX `idx_txpow_coin_coinid` (`coinid`),"
-						+ "  CONSTRAINT `uidx_txpow_coin_txpowid_coinid` UNIQUE(`txpowid`, `coinid`)"
-						+ ")";
-
-		//Run it..
-		stmt.execute(tbl_txpow_coin);
 
 		//Create the coin table
 		String coin = "CREATE TABLE IF NOT EXISTS `coin` ("
@@ -186,6 +151,55 @@ public class MySQLConnect {
 		//Run it..
 		stmt.execute(coin);
 
+		//Create the TxHeader table (TxHeader model from TxBlock-TxPoW-TxHeader)
+		String tbl_txheader = "CREATE TABLE IF NOT EXISTS `txheader` ("
+						+ "  `id` int NOT NULL AUTO_INCREMENT,"
+						+ "  `txpowid` varchar(80) NOT NULL,"
+						+ "  `chainid` varchar(20) NOT NULL,"
+						+ "  `blkdiff` varchar(80) NOT NULL,"
+						+ "  `mmr` varchar(80) NOT NULL,"
+						+ "  `total` bigint NOT NULL,"
+						+ "  `txbodyhash` varchar(80) NOT NULL,"
+						+ "  `nonce` varchar(80) NOT NULL,"
+						+ "  PRIMARY KEY(`id`),"
+						+ "  FOREIGN KEY (`txpowid`) REFERENCES txpow(`txpowid`),"
+						+ "  INDEX `idx_txpow_txpowid` (`txpowid`)"
+						+ ")";
+
+		//Run it..
+		stmt.execute(tbl_txheader);
+
+		//Create the TxPoW ID list (Transactions TxPoW ID list from TxBlock-TxPoW-TxBody-TxPowIDList)
+		String tbl_txpowidlist = "CREATE TABLE IF NOT EXISTS `txpowidlist` ("
+						+ "  `id` int NOT NULL AUTO_INCREMENT,"
+						+ "  `txpowid` varchar(80) NOT NULL,"
+						+ "  `txpowid_txn` varchar(80) NOT NULL,"
+						+ "  PRIMARY KEY(`id`),"
+						+ "  FOREIGN KEY (`txpowid`) REFERENCES txpow(`txpowid`),"
+						+ "  INDEX `idx_txpowidlist_txpowid` (`txpowid`),"
+						+ "  INDEX `idx_txpowidlist_txpowid_txn` (`txpowid_txn`),"
+						+ "  CONSTRAINT `uidx_txpowidlist_txpowid_txpowid_txn` UNIQUE(`txpowid`, `txpowid_txn`)"
+						+ ")";
+
+		//Run it..
+		stmt.execute(tbl_txpowidlist);
+
+		//Create the TxPoW-Coin link
+		String tbl_txpow_coin = "CREATE TABLE IF NOT EXISTS `txpow_coin` ("
+						+ "  `id` int NOT NULL AUTO_INCREMENT,"
+						+ "  `txpowid` varchar(80) NOT NULL,"
+						+ "  `coinid` varchar(80) NOT NULL,"
+						+ "  PRIMARY KEY(`id`),"
+						+ "  FOREIGN KEY (`txpowid`) REFERENCES txpow(`txpowid`),"
+						+ "  FOREIGN KEY (`coinid`) REFERENCES coin(`coinid`),"
+						+ "  INDEX `idx_txpow_coin_txpowid` (`txpowid`),"
+						+ "  INDEX `idx_txpow_coin_coinid` (`coinid`),"
+						+ "  CONSTRAINT `uidx_txpow_coin_txpowid_coinid` UNIQUE(`txpowid`, `coinid`)"
+						+ ")";
+
+		//Run it..
+		stmt.execute(tbl_txpow_coin);
+
 		//Create the coin states table
 		String coin_state = "CREATE TABLE IF NOT EXISTS `coin_state` ("
 						+ "  `id` int NOT NULL AUTO_INCREMENT,"
@@ -194,6 +208,7 @@ public class MySQLConnect {
 						+ "  `type` int NOT NULL,"
 						+ "  `data` text NULL,"
 						+ "  PRIMARY KEY (`id`),"
+						+ "  FOREIGN KEY (`coinid`) REFERENCES coin(`coinid`),"
 						+ "  INDEX `idx_coin_state_coinid` (`coinid`)"
 						+ ")";
 
@@ -241,21 +256,28 @@ public class MySQLConnect {
 		SAVE_CASCADE = mConnection.prepareStatement("INSERT INTO cascadedata ( cascadetip, fulldata ) VALUES ( ?, ? )");
 		LOAD_CASCADE = mConnection.prepareStatement("SELECT fulldata FROM cascadedata ORDER BY cascadetip ASC LIMIT 1");
 
-		String insert_txpow = "INSERT IGNORE INTO txpow ( txpowid, superblock, size, burn ) VALUES ( ?, ?, ?, ? )";
+		String insert_txpow = "INSERT IGNORE INTO txpow ( txpowid, block, superblock, size, burn, timemilli ) VALUES ( ?, ?, ?, ?, ?, ? )";
 		SQL_INSERT_TXPOW 	= mConnection.prepareStatement(insert_txpow);
+		SQL_DELETE_TXPOW 	= mConnection.prepareStatement("DELETE FROM txpow WHERE txpowid=?");
+		SQL_SELECT_LAST_TXPOW 	= mConnection.prepareStatement("SELECT FROM txpow ORDER BY block DESC LIMIT 1");
 
-		String insert_txheader = "INSERT IGNORE INTO txheader ( txpowid, chainid, block, blkdiff, mmr, total, txbodyhash, nonce, timemilli ) VALUES ( ?, ?, ?, ?, ?, ?, ?, ?, ? )";
+		String insert_txheader = "INSERT IGNORE INTO txheader ( txpowid, chainid, blkdiff, mmr, total, txbodyhash, nonce ) VALUES ( ?, ?, ?, ?, ?, ?, ? )";
 		SQL_INSERT_TXHEADER 	= mConnection.prepareStatement(insert_txheader);
+		SQL_DELETE_TXHEADER 	= mConnection.prepareStatement("DELETE FROM txheader WHERE txpowid=?");
 
 		SQL_INSERT_TXPOWIDLIST 	= mConnection.prepareStatement("INSERT IGNORE INTO txpowidlist ( txpowid, txpowid_txn ) VALUES ( ?, ? )");
+		SQL_DELETE_TXPOWIDLIST 	= mConnection.prepareStatement("DELETE FROM txpowidlist WHERE txpowid=?");
 		SQL_INSERT_TXPOWCOIN 	= mConnection.prepareStatement("INSERT IGNORE INTO txpow_coin ( txpowid, coinid ) VALUES ( ?, ? )");
+		SQL_DELETE_TXPOWCOIN 	= mConnection.prepareStatement("DELETE FROM txpow_coin WHERE txpowid=?");
 
 		String insert_coin = "INSERT INTO coin ( coinid, amount, address, miniaddress, tokenid, mmrentry, created ) VALUES ( ?, ?, ?, ?, ?, ?, ? ) AS new ON DUPLICATE KEY UPDATE mmrentry = new.mmrentry, created = new.created";
 		SQL_INSERT_COIN 	= mConnection.prepareStatement(insert_coin);
+		SQL_DELETE_COIN 	= mConnection.prepareStatement("DELETE FROM coin WHERE coinid=?");
 
 		SQL_INSERT_COIN_STATE = mConnection.prepareStatement("INSERT IGNORE INTO coin_state ( coinid, port, type, data ) VALUES ( ?, ?, ?, ? )");
+		SQL_DELETE_COIN_STATE	= mConnection.prepareStatement("DELETE FROM coin_state WHERE coinid=?");
 
-		String insert_token = "INSERT INTO token ( tokenid, coinid, name, description, url, ticker, webvalidate, object, total, totalamount, decimals, scale, script, created ) VALUES ( ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ? ) ON DUPLICATE KEY UPDATE id=id";
+		String insert_token = "INSERT IGNORE INTO token ( tokenid, coinid, name, description, url, ticker, webvalidate, object, total, totalamount, decimals, scale, script, created ) VALUES ( ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ? )";
 		SQL_INSERT_TOKEN 	= mConnection.prepareStatement(insert_token);
 	}
 
@@ -273,12 +295,14 @@ public class MySQLConnect {
 		Statement stmt = mConnection.createStatement();
 		stmt.execute("DROP TABLE syncblock");
 		stmt.execute("DROP TABLE cascadedata");
-		stmt.execute("DROP TABLE txpow");
+
 		stmt.execute("DROP TABLE txheader");
 		stmt.execute("DROP TABLE txpowidlist");
-		stmt.execute("DROP TABLE txpow_coin");
-		stmt.execute("DROP TABLE coin");
 		stmt.execute("DROP TABLE coin_state");
+		stmt.execute("DROP TABLE txpow_coin");
+
+		stmt.execute("DROP TABLE txpow");
+		stmt.execute("DROP TABLE coin");
 		stmt.execute("DROP TABLE token");
 
 		stmt.close();
@@ -400,9 +424,19 @@ public class MySQLConnect {
 	}
 
 	public synchronized boolean saveBlock(TxBlock zBlock, boolean zSynced) {
+
+		boolean needClear = zSynced;
+
 		try {
 
 			if (zSynced) {
+				if (loadLastBlock() = loadLastTxPoW())
+					needClear = false;
+
+				if (needClear)
+					//Clear unsynced data
+					clearUnsynced(zBlock.getTxPoW().getTxPoWID());
+
 				//get the MiniData version..
 				MiniData syncdata = MiniData.getMiniDataVersion(zBlock);
 
@@ -426,31 +460,40 @@ public class MySQLConnect {
 			// Buffer TxPoW
 			TxPoW blockTxPoW = zBlock.getTxPoW();
 
+			//Get the Query ready
+			SQL_INSERT_TXPOW.clearParameters();
+
 			// Store TxPoW
 			SQL_INSERT_TXPOW.setString(1, blockTxPoW.getTxPoWID());
-			SQL_INSERT_TXPOW.setInt(2, blockTxPoW.getSuperLevel());
-			SQL_INSERT_TXPOW.setLong(3, blockTxPoW.getSizeinBytes());
-			SQL_INSERT_TXPOW.setString(4, blockTxPoW.getBurn().toString());
+			SQL_INSERT_TXPOW.setLong(2, blockTxPoW.getBlockNumber().getAsLong());
+			SQL_INSERT_TXPOW.setInt(3, blockTxPoW.getSuperLevel());
+			SQL_INSERT_TXPOW.setLong(4, blockTxPoW.getSizeinBytes());
+			SQL_INSERT_TXPOW.setString(5, blockTxPoW.getBurn().toString());
+			SQL_INSERT_TXPOW.setLong(6, blockTxPoW.getTimeMilli().getAsLong());
 
 			//Do it.
 			SQL_INSERT_TXPOW.execute();
 
+			//Get the Query ready
+			SQL_INSERT_TXHEADER.clearParameters();
+
 			// Store TxPoW TxHeader
 			SQL_INSERT_TXHEADER.setString(1, blockTxPoW.getTxPoWID());
 			SQL_INSERT_TXHEADER.setString(2, blockTxPoW.getChainID().to0xString());
-			SQL_INSERT_TXHEADER.setLong(3, blockTxPoW.getBlockNumber().getAsLong());
-			SQL_INSERT_TXHEADER.setString(4, blockTxPoW.getBlockDifficulty().to0xString());
-			SQL_INSERT_TXHEADER.setString(5, blockTxPoW.getMMRRoot().to0xString());
-			SQL_INSERT_TXHEADER.setLong(6, blockTxPoW.getMMRTotal().getAsLong());
-			SQL_INSERT_TXHEADER.setString(7, blockTxPoW.getTxHeader().getBodyHash().to0xString());
-			SQL_INSERT_TXHEADER.setString(8, blockTxPoW.getNonce().toString());
-			SQL_INSERT_TXHEADER.setLong(9, blockTxPoW.getTimeMilli().getAsLong());
+			SQL_INSERT_TXHEADER.setString(3, blockTxPoW.getBlockDifficulty().to0xString());
+			SQL_INSERT_TXHEADER.setString(4, blockTxPoW.getMMRRoot().to0xString());
+			SQL_INSERT_TXHEADER.setLong(5, blockTxPoW.getMMRTotal().getAsLong());
+			SQL_INSERT_TXHEADER.setString(6, blockTxPoW.getTxHeader().getBodyHash().to0xString());
+			SQL_INSERT_TXHEADER.setString(7, blockTxPoW.getNonce().toString());
 
 			//Do it.
 			SQL_INSERT_TXHEADER.execute();
 
 			// Store TxPoW ID List (Transactions)
 			for (MiniData txpow_id : zBlock.getTxPoW().getBlockTransactions()) {
+				//Get the Query ready
+				SQL_INSERT_TXPOWIDLIST.clearParameters();
+
 				SQL_INSERT_TXPOWIDLIST.setString(1, blockTxPoW.getTxPoWID());
 				SQL_INSERT_TXPOWIDLIST.setString(2, txpow_id.to0xString());
 
@@ -464,18 +507,16 @@ public class MySQLConnect {
 			ArrayList<Coin> outputs = zBlock.getOutputCoins();
 
 			for(Coin cc : outputs) {
-				SQL_INSERT_COIN.clearParameters();
 
-				SQL_INSERT_COIN.setString(1, cc.getCoinID().to0xString());
-				SQL_INSERT_COIN.setString(2, cc.getAmount().toString());
-				SQL_INSERT_COIN.setString(3, cc.getAddress().to0xString());
-				SQL_INSERT_COIN.setString(4, Address.makeMinimaAddress(cc.getAddress()));
-				SQL_INSERT_COIN.setString(5, cc.getTokenID().to0xString());
-				SQL_INSERT_COIN.setString(6, cc.getMMREntryNumber().toString());
-				SQL_INSERT_COIN.setLong(7, cc.getBlockCreated().getAsLong());
+				// Store coin
+				saveCoin(buffCoin);
 
-				//Do it.
-				SQL_INSERT_COIN.execute();
+				// Store coin state
+				if (buffCoin.getState().size() > 0)
+					saveCoinState(buffCoin.getCoinID().to0xString(), buffCoin.getState());
+
+				//Get the Query ready
+				SQL_INSERT_TXPOWCOIN.clearParameters();
 
 				//Store link TxPoW-Coin
 				SQL_INSERT_TXPOWCOIN.setString(1, blockTxPoW.getTxPoWID());
@@ -484,18 +525,6 @@ public class MySQLConnect {
 				//Do it.
 				SQL_INSERT_TXPOWCOIN.execute();
 
-				// Store coin state
-				if (cc.getState().size() > 0) {
-					for (StateVariable coin_state : cc.getState()) {
-						SQL_INSERT_COIN_STATE.setString(1, cc.getCoinID().to0xString());
-						SQL_INSERT_COIN_STATE.setInt(2, coin_state.getPort());
-						SQL_INSERT_COIN_STATE.setInt(3, coin_state.getType().getValue());
-						SQL_INSERT_COIN_STATE.setString(4, coin_state.getData().toString());
-
-						//Do it.
-						SQL_INSERT_COIN_STATE.execute();
-					}
-				}
 			}
 
 			// Spent coins
@@ -503,88 +532,20 @@ public class MySQLConnect {
 			ArrayList<CoinProof> inputs = zBlock.getInputCoinProofs();
 			//Set main params
 			for(CoinProof incoin : inputs) {
-				//Get the Query ready
-				SQL_INSERT_COIN.clearParameters();
 
 				Coin buffCoin = incoin.getCoin();
 
-				SQL_INSERT_COIN.setString(1, buffCoin.getCoinID().to0xString());
-				SQL_INSERT_COIN.setString(2, buffCoin.getAmount().toString());
-				SQL_INSERT_COIN.setString(3, buffCoin.getAddress().to0xString());
-				SQL_INSERT_COIN.setString(4, Address.makeMinimaAddress(buffCoin.getAddress()));
-				SQL_INSERT_COIN.setString(5, buffCoin.getTokenID().to0xString());
-				SQL_INSERT_COIN.setString(6, buffCoin.getMMREntryNumber().toString());
-				SQL_INSERT_COIN.setLong(7, buffCoin.getBlockCreated().getAsLong());
-
-				//Do it.
-				SQL_INSERT_COIN.execute();
+				// Store coin
+				saveCoin(buffCoin);
 
 				// Store coin state
-				if (buffCoin.getState().size() > 0) {
-					for (StateVariable coin_state : buffCoin.getState()) {
-						SQL_INSERT_COIN_STATE.setString(1, buffCoin.getCoinID().to0xString());
-						SQL_INSERT_COIN_STATE.setInt(2, coin_state.getPort());
-						SQL_INSERT_COIN_STATE.setInt(3, coin_state.getType().getValue());
-						SQL_INSERT_COIN_STATE.setString(4, coin_state.getData().toString());
+				if (buffCoin.getState().size() > 0)
+					saveCoinState(buffCoin.getCoinID().to0xString(), buffCoin.getState());
 
-						//Do it.
-						SQL_INSERT_COIN_STATE.execute();
-					}
-				}
-
-				//Is coin have token
-				if (buffCoin.getToken() != null) {
-					Token buffToken = buffCoin.getToken();
-
-					SQL_INSERT_TOKEN.setString(1, buffToken.getTokenID().to0xString());
-					SQL_INSERT_TOKEN.setString(2, buffToken.getCoinID().to0xString());
-					//Is name a JSON
-					if(buffToken.getName().toString().trim().startsWith("{")) {
-						//Get the JSON
-						JSONObject jsonname = null;
-						try {
-							jsonname = (JSONObject) new JSONParser().parse(buffToken.getName().toString());
-						} catch (ParseException e) {
-							// TODO Auto-generated catch block
-							e.printStackTrace();
-						}
-
-						if (jsonname.containsKey("name"))
-							SQL_INSERT_TOKEN.setString(3, jsonname.get("name").toString());
-						else
-							SQL_INSERT_TOKEN.setNull(3, java.sql.Types.VARCHAR);
-						if (jsonname.containsKey("description"))
-							SQL_INSERT_TOKEN.setString(4, jsonname.get("description").toString());
-						else
-							SQL_INSERT_TOKEN.setNull(4, java.sql.Types.VARCHAR);
-						if (jsonname.containsKey("url"))
-							SQL_INSERT_TOKEN.setString(5, jsonname.get("url").toString());
-						else
-							SQL_INSERT_TOKEN.setNull(5, java.sql.Types.VARCHAR);
-						if (jsonname.containsKey("ticker"))
-							SQL_INSERT_TOKEN.setString(6, jsonname.get("ticker").toString());
-						else
-							SQL_INSERT_TOKEN.setNull(6, java.sql.Types.VARCHAR);
-						if (jsonname.containsKey("webvalidate"))
-							SQL_INSERT_TOKEN.setString(7, jsonname.get("webvalidate").toString());
-						else
-							SQL_INSERT_TOKEN.setNull(7, java.sql.Types.VARCHAR);
-
-						SQL_INSERT_TOKEN.setString(8, buffToken.getName().toString());
-
-					} else {
-						SQL_INSERT_TOKEN.setString(3, buffToken.getName().toString());
-					}
-					SQL_INSERT_TOKEN.setLong(9, buffToken.getTotalTokens().getAsLong());
-					SQL_INSERT_TOKEN.setLong(10, buffToken.getAmount().getAsLong());
-					SQL_INSERT_TOKEN.setInt(11, buffToken.getDecimalPlaces().getAsInt());
-					SQL_INSERT_TOKEN.setInt(12, buffToken.getScale().getAsInt());
-					SQL_INSERT_TOKEN.setString(13, buffToken.getTokenScript().toString());
-					SQL_INSERT_TOKEN.setLong(14, buffToken.getCreated().getAsLong());
-
-					//Do it.
-					SQL_INSERT_TOKEN.execute();
-				}
+				// Is coin have token
+				if (buffCoin.getToken() != null)
+					saveToken(buffCoin.getToken());
+					
 			}
 
 			//MinimaLogger.log("Block "+zBlock.getTxPoW().getBlockNumber()+" have a body: "+zBody.toJSON());
@@ -596,6 +557,135 @@ public class MySQLConnect {
 		}
 
 		return false;
+	}
+
+	public synchronized boolean saveCoin(Coin zCoin) {
+		try {
+			//Get the Query ready
+			SQL_INSERT_COIN.clearParameters();
+
+			Coin buffCoin = incoin.getCoin();
+
+			SQL_INSERT_COIN.setString(1, zCoin.getCoinID().to0xString());
+			SQL_INSERT_COIN.setString(2, zCoin.getAmount().toString());
+			SQL_INSERT_COIN.setString(3, zCoin.getAddress().to0xString());
+			SQL_INSERT_COIN.setString(4, Address.makeMinimaAddress(zCoin.getAddress()));
+			SQL_INSERT_COIN.setString(5, zCoin.getTokenID().to0xString());
+			SQL_INSERT_COIN.setString(6, zCoin.getMMREntryNumber().toString());
+			SQL_INSERT_COIN.setLong(7, zCoin.getBlockCreated().getAsLong());
+
+			//Do it.
+			SQL_INSERT_COIN.execute();
+		} catch (SQLException e) {
+			MinimaLogger.log(e);
+		}
+	}
+
+	public synchronized boolean saveCoinState(String zCoinID, ArrayList<StateVariable> zCoinState) {
+		try {
+			for (StateVariable coin_state : zCoinState) {
+				//Get the Query ready
+				SQL_INSERT_COIN_STATE.clearParameters();
+
+				SQL_INSERT_COIN_STATE.setString(1, zCoinID);
+				SQL_INSERT_COIN_STATE.setInt(2, coin_state.getPort());
+				SQL_INSERT_COIN_STATE.setInt(3, coin_state.getType().getValue());
+				SQL_INSERT_COIN_STATE.setString(4, coin_state.getData().toString());
+
+				//Do it.
+				SQL_INSERT_COIN_STATE.execute();
+			}
+		} catch (SQLException e) {
+			MinimaLogger.log(e);
+		}
+	}
+
+	public synchronized boolean saveToken(Token zToken) {
+		try {
+			//Get the Query ready
+			SQL_INSERT_TOKEN.clearParameters();
+
+			SQL_INSERT_TOKEN.setString(1, zToken.getTokenID().to0xString());
+			SQL_INSERT_TOKEN.setString(2, zToken.getCoinID().to0xString());
+			//Is name a JSON
+			if(buffToken.getName().toString().trim().startsWith("{")) {
+				//Get the JSON
+				JSONObject jsonname = null;
+				try {
+					jsonname = (JSONObject) new JSONParser().parse(zToken.getName().toString());
+				} catch (ParseException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+
+				if (jsonname.containsKey("name"))
+					SQL_INSERT_TOKEN.setString(3, jsonname.get("name").toString());
+				else
+					SQL_INSERT_TOKEN.setNull(3, java.sql.Types.VARCHAR);
+				if (jsonname.containsKey("description"))
+					SQL_INSERT_TOKEN.setString(4, jsonname.get("description").toString());
+				else
+					SQL_INSERT_TOKEN.setNull(4, java.sql.Types.VARCHAR);
+				if (jsonname.containsKey("url"))
+					SQL_INSERT_TOKEN.setString(5, jsonname.get("url").toString());
+				else
+					SQL_INSERT_TOKEN.setNull(5, java.sql.Types.VARCHAR);
+				if (jsonname.containsKey("ticker"))
+					SQL_INSERT_TOKEN.setString(6, jsonname.get("ticker").toString());
+				else
+					SQL_INSERT_TOKEN.setNull(6, java.sql.Types.VARCHAR);
+				if (jsonname.containsKey("webvalidate"))
+					SQL_INSERT_TOKEN.setString(7, jsonname.get("webvalidate").toString());
+				else
+					SQL_INSERT_TOKEN.setNull(7, java.sql.Types.VARCHAR);
+
+				SQL_INSERT_TOKEN.setString(8, zToken.getName().toString());
+
+			} else {
+				SQL_INSERT_TOKEN.setString(3, zToken.getName().toString());
+			}
+			SQL_INSERT_TOKEN.setLong(9, zToken.getTotalTokens().getAsLong());
+			SQL_INSERT_TOKEN.setLong(10, zToken.getAmount().getAsLong());
+			SQL_INSERT_TOKEN.setInt(11, zToken.getDecimalPlaces().getAsInt());
+			SQL_INSERT_TOKEN.setInt(12, zToken.getScale().getAsInt());
+			SQL_INSERT_TOKEN.setString(13, zToken.getTokenScript().toString());
+			SQL_INSERT_TOKEN.setLong(14, zToken.getCreated().getAsLong());
+
+			//Do it.
+			SQL_INSERT_TOKEN.execute();
+		} catch (SQLException e) {
+			MinimaLogger.log(e);
+		}
+	}
+
+	public synchronized boolean clearUnsynced(String zTxPoWID) {
+		try {
+			SQL_DELETE_TXPOW.clearParameters();
+			SQL_DELETE_TXPOW.setString(1, zTxPoWID);
+			SQL_DELETE_TXPOW.execute();
+
+			SQL_DELETE_TXHEADER.clearParameters();
+			SQL_DELETE_TXHEADER.setString(1, zTxPoWID);
+			SQL_DELETE_TXHEADER.execute();
+
+			SQL_DELETE_TXPOWIDLIST.clearParameters();
+			SQL_DELETE_TXPOWIDLIST.setString(1, zTxPoWID);
+			SQL_DELETE_TXPOWIDLIST.execute();
+
+			SQL_DELETE_TXPOWCOIN.clearParameters();
+			SQL_DELETE_TXPOWCOIN.setString(1, zTxPoWID);
+			SQL_DELETE_TXPOWCOIN.execute();
+
+			SQL_DELETE_COIN.clearParameters();
+			SQL_DELETE_COIN.setString(1, zTxPoWID);
+			SQL_DELETE_COIN.execute();
+
+			SQL_DELETE_COIN_STATE.clearParameters();
+			SQL_DELETE_COIN_STATE.setString(1, zTxPoWID);
+			SQL_DELETE_COIN_STATE.execute();
+		} catch (SQLException e) {
+			MinimaLogger.log(e);
+		}
 	}
 
 	public synchronized TxBlock loadBlockFromID(String zTxPoWID) {
@@ -699,6 +789,32 @@ public class MySQLConnect {
 
 			//Run the query
 			ResultSet rs = SQL_SELECT_LAST_BLOCK.executeQuery();
+
+			//Is there a valid result.. ?
+			if(rs.next()) {
+
+				//Get the block
+				long block = rs.getLong("block");
+
+				return block;
+			}
+
+		} catch (SQLException e) {
+			MinimaLogger.log(e);
+		}
+
+		return -1;
+	}
+
+	public synchronized long loadLastTxPoW() {
+
+		try {
+
+			//Set search params
+			SQL_SELECT_LAST_TXPOW.clearParameters();
+
+			//Run the query
+			ResultSet rs = SQL_SELECT_LAST_TXPOW.executeQuery();
 
 			//Is there a valid result.. ?
 			if(rs.next()) {
