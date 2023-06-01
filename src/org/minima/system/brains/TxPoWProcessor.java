@@ -2,6 +2,7 @@ package org.minima.system.brains;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.sql.SQLException;
 
 import org.minima.database.MinimaDB;
 import org.minima.database.archive.ArchiveManager;
