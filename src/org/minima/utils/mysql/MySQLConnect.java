@@ -253,7 +253,7 @@ public class MySQLConnect {
 		String insert_coin = "INSERT INTO coin ( coinid, amount, address, miniaddress, tokenid, mmrentry, created ) VALUES ( ?, ?, ?, ?, ?, ?, ? ) AS new ON DUPLICATE KEY UPDATE mmrentry = new.mmrentry, created = new.created";
 		SQL_INSERT_COIN 	= mConnection.prepareStatement(insert_coin);
 
-		SQL_INSERT_COIN_STATE = mConnection.prepareStatement("INSERT INTO coin_state ( coinid, port, type, data ) VALUES ( ?, ?, ?, ? )");
+		SQL_INSERT_COIN_STATE = mConnection.prepareStatement("INSERT IGNORE INTO coin_state ( coinid, port, type, data ) VALUES ( ?, ?, ?, ? )");
 
 		String insert_token = "INSERT INTO token ( tokenid, coinid, name, description, url, ticker, webvalidate, object, total, totalamount, decimals, scale, script, created ) VALUES ( ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ? ) ON DUPLICATE KEY UPDATE id=id";
 		SQL_INSERT_TOKEN 	= mConnection.prepareStatement(insert_token);
