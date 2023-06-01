@@ -119,9 +119,13 @@ public class TxPoWProcessor extends MessageProcessor {
 		if (udb.getAutoBackupMySQL()) {
 			//Get the login details..
 			MySQLConnect mysql = new MySQLConnect(udb.getAutoMySQLHost(), udb.getAutoMySQLDB(), udb.getAutoMySQLUser(), udb.getAutoMySQLPassword());
+			
 			mysql.init();
 
 			mysql.saveBlock(zTxBlock);
+
+			//Then shutdown
+			mysql.shutdown();
 		} else {
 			return;
 		}
