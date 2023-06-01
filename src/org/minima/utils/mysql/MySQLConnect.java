@@ -418,22 +418,14 @@ public class MySQLConnect {
 		return null;
 	}
 
-	public synchronized boolean saveBlock(TxBlock zBlock, boolean zSynced) {
-
-		boolean needClear = zSynced;
+	public synchronized boolean saveBlock(TxBlock zBlock, boolean zSynced, boolean, zClear) {
 
 		try {
 
 			if (zSynced) {
 
-				long last_block = loadLastBlock();
-				long last_txpow = loadLastTxPoW();
-
-				if (last_block == last_txpow)
-					needClear = false;
-
-				if (needClear)
-					//Clear unsynced data
+				//Clear unsynced data
+				if (zClear)
 					clearUnsynced(zBlock.getTxPoW().getTxPoWID());
 
 				//get the MiniData version..
@@ -942,7 +934,7 @@ public class MySQLConnect {
 		txp.calculateTXPOWID();
 		txblk = new TxBlock(txp);
 
-		mysql.saveBlock(txblk, true);
+		mysql.saveBlock(txblk, true, false);
 
 		//Now search for the top block..
 		long firstblock = mysql.loadFirstBlock();

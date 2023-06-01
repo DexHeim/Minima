@@ -274,10 +274,15 @@ public class mysql extends Command {
 
 			boolean finished = false;
 			TxBlock lastblock = null;
+			long lastTxPoW = 0;
+
 			mysql.saveIndexes();
 			MinimaLogger.log("All indexes saved");
 			mysql.deleteIndexes();
 			MinimaLogger.log("All indexes deleted");
+
+			lastTxPoW = mysql.loadLastTxPoW();
+
 			while(!finished){
 
 				long ender = startload+100;
@@ -314,7 +319,7 @@ public class mysql extends Command {
 					long saveblock = block.getTxPoW().getBlockNumber().getAsLong();
 
 					//Save to MySQL..
-					mysql.saveBlock(block, true);
+					mysql.saveBlock(block, true, (saveblock<=lastTxPoW));
 
 					//What block is this
 					if(saveblock>startload) {
