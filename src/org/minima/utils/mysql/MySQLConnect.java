@@ -241,14 +241,14 @@ public class MySQLConnect {
 		SAVE_CASCADE = mConnection.prepareStatement("INSERT INTO cascadedata ( cascadetip, fulldata ) VALUES ( ?, ? )");
 		LOAD_CASCADE = mConnection.prepareStatement("SELECT fulldata FROM cascadedata ORDER BY cascadetip ASC LIMIT 1");
 
-		String insert_txpow = "INSERT INTO txpow ( txpowid, superblock, size, burn ) VALUES ( ?, ?, ?, ? )";
+		String insert_txpow = "INSERT IGNORE INTO txpow ( txpowid, superblock, size, burn ) VALUES ( ?, ?, ?, ? )";
 		SQL_INSERT_TXPOW 	= mConnection.prepareStatement(insert_txpow);
 
-		String insert_txheader = "INSERT INTO txheader ( txpowid, chainid, block, blkdiff, mmr, total, txbodyhash, nonce, timemilli ) VALUES ( ?, ?, ?, ?, ?, ?, ?, ?, ? )";
+		String insert_txheader = "INSERT IGNORE INTO txheader ( txpowid, chainid, block, blkdiff, mmr, total, txbodyhash, nonce, timemilli ) VALUES ( ?, ?, ?, ?, ?, ?, ?, ?, ? )";
 		SQL_INSERT_TXHEADER 	= mConnection.prepareStatement(insert_txheader);
 
-		SQL_INSERT_TXPOWIDLIST 	= mConnection.prepareStatement("INSERT INTO txpowidlist ( txpowid, txpowid_txn ) VALUES ( ?, ? )");
-		SQL_INSERT_TXPOWCOIN 	= mConnection.prepareStatement("INSERT INTO txpow_coin ( txpowid, coinid ) VALUES ( ?, ? )");
+		SQL_INSERT_TXPOWIDLIST 	= mConnection.prepareStatement("INSERT IGNORE INTO txpowidlist ( txpowid, txpowid_txn ) VALUES ( ?, ? )");
+		SQL_INSERT_TXPOWCOIN 	= mConnection.prepareStatement("INSERT IGNORE INTO txpow_coin ( txpowid, coinid ) VALUES ( ?, ? )");
 
 		String insert_coin = "INSERT INTO coin ( coinid, amount, address, miniaddress, tokenid, mmrentry, created ) VALUES ( ?, ?, ?, ?, ?, ?, ? ) AS new ON DUPLICATE KEY UPDATE mmrentry = new.mmrentry, created = new.created";
 		SQL_INSERT_COIN 	= mConnection.prepareStatement(insert_coin);
