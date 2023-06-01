@@ -162,7 +162,6 @@ public class MySQLConnect {
 						+ "  `txbodyhash` varchar(80) NOT NULL,"
 						+ "  `nonce` varchar(80) NOT NULL,"
 						+ "  PRIMARY KEY(`id`),"
-						+ "  FOREIGN KEY (`txpowid`) REFERENCES txpow(`txpowid`),"
 						+ "  INDEX `idx_txpow_txpowid` (`txpowid`)"
 						+ ")";
 
@@ -175,7 +174,6 @@ public class MySQLConnect {
 						+ "  `txpowid` varchar(80) NOT NULL,"
 						+ "  `txpowid_txn` varchar(80) NOT NULL,"
 						+ "  PRIMARY KEY(`id`),"
-						+ "  FOREIGN KEY (`txpowid`) REFERENCES txpow(`txpowid`),"
 						+ "  INDEX `idx_txpowidlist_txpowid` (`txpowid`),"
 						+ "  INDEX `idx_txpowidlist_txpowid_txn` (`txpowid_txn`),"
 						+ "  CONSTRAINT `uidx_txpowidlist_txpowid_txpowid_txn` UNIQUE(`txpowid`, `txpowid_txn`)"
@@ -190,8 +188,6 @@ public class MySQLConnect {
 						+ "  `txpowid` varchar(80) NOT NULL,"
 						+ "  `coinid` varchar(80) NOT NULL,"
 						+ "  PRIMARY KEY(`id`),"
-						+ "  FOREIGN KEY (`txpowid`) REFERENCES txpow(`txpowid`),"
-						+ "  FOREIGN KEY (`coinid`) REFERENCES coin(`coinid`),"
 						+ "  INDEX `idx_txpow_coin_txpowid` (`txpowid`),"
 						+ "  INDEX `idx_txpow_coin_coinid` (`coinid`),"
 						+ "  CONSTRAINT `uidx_txpow_coin_txpowid_coinid` UNIQUE(`txpowid`, `coinid`)"
@@ -208,7 +204,6 @@ public class MySQLConnect {
 						+ "  `type` int NOT NULL,"
 						+ "  `data` text NULL,"
 						+ "  PRIMARY KEY (`id`),"
-						+ "  FOREIGN KEY (`coinid`) REFERENCES coin(`coinid`),"
 						+ "  INDEX `idx_coin_state_coinid` (`coinid`)"
 						+ ")";
 
