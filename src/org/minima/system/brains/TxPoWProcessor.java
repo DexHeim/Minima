@@ -123,7 +123,8 @@ public class TxPoWProcessor extends MessageProcessor {
 
 			mysql.init();
 
-			mysql.saveBlock(zTxBlock);
+			if (mysql.saveBlock(zTxBlock, false))
+				MinimaLogger.log("Added block to MySQL : "+zTxBlock.getTxPoW().getBlockNumber()+" "+zTxBlock.getTxPoW().getTxPoWID());
 
 			//Then shutdown
 			mysql.shutdown();
@@ -463,7 +464,6 @@ public class TxPoWProcessor extends MessageProcessor {
 		MinimaDB.getDB().getTxBlockDB().addTxBlock(zTxBlock);
 
 		//Add to the MySQL DB
-		MinimaLogger.log("Saving block @"+zTxBlock.getTxPoW().getBlockNumber()+" into MySQL");
 		mysqlProcessTxBlock(zTxBlock);
 
 		//Add the TxPoW to the database - in case we don't have it

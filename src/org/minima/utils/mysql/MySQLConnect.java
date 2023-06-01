@@ -399,25 +399,27 @@ public class MySQLConnect {
 		return null;
 	}
 
-	public synchronized boolean saveBlock(TxBlock zBlock) {
+	public synchronized boolean saveBlock(TxBlock zBlock, boolean zSynced = true) {
 		try {
 
-			//get the MiniData version..
-			MiniData syncdata = MiniData.getMiniDataVersion(zBlock);
+			if (zSynced) {
+				//get the MiniData version..
+				MiniData syncdata = MiniData.getMiniDataVersion(zBlock);
 
-			//Get the Query ready
-			SQL_INSERT_SYNCBLOCK.clearParameters();
+				//Get the Query ready
+				SQL_INSERT_SYNCBLOCK.clearParameters();
 
-			//Set main params
-			SQL_INSERT_SYNCBLOCK.setString(1, zBlock.getTxPoW().getTxPoWID());
-			SQL_INSERT_SYNCBLOCK.setLong(2, zBlock.getTxPoW().getBlockNumber().getAsLong());
-			SQL_INSERT_SYNCBLOCK.setLong(3, System.currentTimeMillis());
+				//Set main params
+				SQL_INSERT_SYNCBLOCK.setString(1, zBlock.getTxPoW().getTxPoWID());
+				SQL_INSERT_SYNCBLOCK.setLong(2, zBlock.getTxPoW().getBlockNumber().getAsLong());
+				SQL_INSERT_SYNCBLOCK.setLong(3, System.currentTimeMillis());
 
-			//And finally the actual bytes
-			SQL_INSERT_SYNCBLOCK.setBytes(4, syncdata.getBytes());
+				//And finally the actual bytes
+				SQL_INSERT_SYNCBLOCK.setBytes(4, syncdata.getBytes());
 
-			//Do it.
-			SQL_INSERT_SYNCBLOCK.execute();
+				//Do it.
+				SQL_INSERT_SYNCBLOCK.execute();
+			}
 
 //			MinimaLogger.log("MYSQL stored synvblock "+zBlock.getTxPoW().getBlockNumber());
 
