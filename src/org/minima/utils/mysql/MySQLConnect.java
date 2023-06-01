@@ -418,7 +418,7 @@ public class MySQLConnect {
 		return null;
 	}
 
-	public synchronized boolean saveBlock(TxBlock zBlock, boolean zSynced, boolean, zClear) {
+	public synchronized boolean saveBlock(TxBlock zBlock, boolean zSynced, boolean zClear) {
 
 		try {
 
