@@ -314,7 +314,7 @@ public class mysql extends Command {
 					long saveblock = block.getTxPoW().getBlockNumber().getAsLong();
 
 					//Save to MySQL..
-					mysql.saveBlock(block);
+					mysql.saveBlock(block, true);
 
 					//What block is this
 					if(saveblock>startload) {

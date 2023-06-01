@@ -401,9 +401,6 @@ public class MySQLConnect {
 
 	public synchronized boolean saveBlock(TxBlock zBlock, boolean zSynced) {
 		try {
-			
-			if (!zSynced)
-				zSynced = true;
 
 			if (zSynced) {
 				//get the MiniData version..
@@ -812,7 +809,7 @@ public class MySQLConnect {
 		txp.calculateTXPOWID();
 		txblk = new TxBlock(txp);
 
-		mysql.saveBlock(txblk);
+		mysql.saveBlock(txblk, true);
 
 		//Now search for the top block..
 		long firstblock = mysql.loadFirstBlock();
