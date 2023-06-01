@@ -568,8 +568,6 @@ public class MySQLConnect {
 			//Get the Query ready
 			SQL_INSERT_COIN.clearParameters();
 
-			Coin buffCoin = incoin.getCoin();
-
 			SQL_INSERT_COIN.setString(1, zCoin.getCoinID().to0xString());
 			SQL_INSERT_COIN.setString(2, zCoin.getAmount().toString());
 			SQL_INSERT_COIN.setString(3, zCoin.getAddress().to0xString());
