@@ -578,9 +578,14 @@ public class MySQLConnect {
 
 			//Do it.
 			SQL_INSERT_COIN.execute();
+
+			return true;
+
 		} catch (SQLException e) {
 			MinimaLogger.log(e);
 		}
+
+		return false;
 	}
 
 	public synchronized boolean saveCoinState(String zCoinID, ArrayList<StateVariable> zCoinState) {
@@ -596,10 +601,14 @@ public class MySQLConnect {
 
 				//Do it.
 				SQL_INSERT_COIN_STATE.execute();
+
+				return true;
+
+			} catch (SQLException e) {
+				MinimaLogger.log(e);
 			}
-		} catch (SQLException e) {
-			MinimaLogger.log(e);
-		}
+
+			return false;
 	}
 
 	public synchronized boolean saveToken(Token zToken) {
@@ -655,9 +664,14 @@ public class MySQLConnect {
 
 			//Do it.
 			SQL_INSERT_TOKEN.execute();
+
+			return true;
+
 		} catch (SQLException e) {
 			MinimaLogger.log(e);
 		}
+
+		return false;
 	}
 
 	public synchronized boolean clearUnsynced(String zTxPoWID) {
@@ -685,9 +699,14 @@ public class MySQLConnect {
 			SQL_DELETE_COIN_STATE.clearParameters();
 			SQL_DELETE_COIN_STATE.setString(1, zTxPoWID);
 			SQL_DELETE_COIN_STATE.execute();
+
+			return true;
+
 		} catch (SQLException e) {
 			MinimaLogger.log(e);
 		}
+
+		return false;
 	}
 
 	public synchronized TxBlock loadBlockFromID(String zTxPoWID) {
