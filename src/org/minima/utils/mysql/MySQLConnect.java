@@ -399,8 +399,11 @@ public class MySQLConnect {
 		return null;
 	}
 
-	public synchronized boolean saveBlock(TxBlock zBlock, boolean zSynced = true) {
+	public synchronized boolean saveBlock(TxBlock zBlock, boolean zSynced) {
 		try {
+			
+			if (!zSynced)
+				zSynced = true;
 
 			if (zSynced) {
 				//get the MiniData version..
