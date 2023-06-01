@@ -101,7 +101,7 @@ public class TxPoWProcessor extends MessageProcessor {
 	/**
 	 * Main entry point for a Archive node into the system
 	 */
-	public void mysqlProcessTxBlock(TxBlock zTxBlock) {
+	public void mysqlProcessTxBlock(TxBlock zTxBlock) throws SQLException {
 
 		//Are we shutting down
 		if(Main.getInstance().isShuttongDownOrRestoring()) {
@@ -119,7 +119,7 @@ public class TxPoWProcessor extends MessageProcessor {
 		if (udb.getAutoBackupMySQL()) {
 			//Get the login details..
 			MySQLConnect mysql = new MySQLConnect(udb.getAutoMySQLHost(), udb.getAutoMySQLDB(), udb.getAutoMySQLUser(), udb.getAutoMySQLPassword());
-			
+
 			mysql.init();
 
 			mysql.saveBlock(zTxBlock);
