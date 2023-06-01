@@ -545,7 +545,7 @@ public class MySQLConnect {
 				// Is coin have token
 				if (buffCoin.getToken() != null)
 					saveToken(buffCoin.getToken());
-					
+
 			}
 
 			//MinimaLogger.log("Block "+zBlock.getTxPoW().getBlockNumber()+" have a body: "+zBody.toJSON());
@@ -608,7 +608,7 @@ public class MySQLConnect {
 			SQL_INSERT_TOKEN.setString(1, zToken.getTokenID().to0xString());
 			SQL_INSERT_TOKEN.setString(2, zToken.getCoinID().to0xString());
 			//Is name a JSON
-			if(buffToken.getName().toString().trim().startsWith("{")) {
+			if(zToken.getName().toString().trim().startsWith("{")) {
 				//Get the JSON
 				JSONObject jsonname = null;
 				try {
