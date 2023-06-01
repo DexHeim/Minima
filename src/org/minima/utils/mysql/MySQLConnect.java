@@ -430,7 +430,11 @@ public class MySQLConnect {
 		try {
 
 			if (zSynced) {
-				if (loadLastBlock() = loadLastTxPoW())
+
+				long last_block = loadLastBlock();
+				long last_txpow = loadLastTxPoW();
+
+				if (last_block = last_txpow)
 					needClear = false;
 
 				if (needClear)
