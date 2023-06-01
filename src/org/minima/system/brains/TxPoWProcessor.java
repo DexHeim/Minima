@@ -25,6 +25,8 @@ import org.minima.utils.Stack;
 import org.minima.utils.messages.Message;
 import org.minima.utils.messages.MessageProcessor;
 
+import org.minima.utils.mysql.MySQLConnect;
+
 public class TxPoWProcessor extends MessageProcessor {
 
 	private static final String TXPOWPROCESSOR_PROCESSTXPOW 		= "TXP_PROCESSTXPOW";
