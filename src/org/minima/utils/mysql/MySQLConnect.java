@@ -434,7 +434,7 @@ public class MySQLConnect {
 				long last_block = loadLastBlock();
 				long last_txpow = loadLastTxPoW();
 
-				if (last_block = last_txpow)
+				if (last_block == last_txpow)
 					needClear = false;
 
 				if (needClear)
