@@ -324,6 +324,7 @@ public class mysql extends Command {
 					//What block is this
 					if(saveblock>startload) {
 						startload = saveblock;
+						lastTxPoW++;
 					}
 				}
 			}
