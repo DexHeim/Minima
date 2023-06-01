@@ -254,7 +254,7 @@ public class MySQLConnect {
 		String insert_txpow = "INSERT IGNORE INTO txpow ( txpowid, block, superblock, size, burn, timemilli ) VALUES ( ?, ?, ?, ?, ?, ? )";
 		SQL_INSERT_TXPOW 	= mConnection.prepareStatement(insert_txpow);
 		SQL_DELETE_TXPOW 	= mConnection.prepareStatement("DELETE FROM txpow WHERE txpowid=?");
-		SQL_SELECT_LAST_TXPOW 	= mConnection.prepareStatement("SELECT FROM txpow ORDER BY block DESC LIMIT 1");
+		SQL_SELECT_LAST_TXPOW 	= mConnection.prepareStatement("SELECT block FROM txpow ORDER BY block DESC LIMIT 1");
 
 		String insert_txheader = "INSERT IGNORE INTO txheader ( txpowid, chainid, blkdiff, mmr, total, txbodyhash, nonce ) VALUES ( ?, ?, ?, ?, ?, ?, ? )";
 		SQL_INSERT_TXHEADER 	= mConnection.prepareStatement(insert_txheader);
