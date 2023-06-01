@@ -481,6 +481,19 @@ public class MySQLConnect {
 
 				//Do it.
 				SQL_INSERT_TXPOWCOIN.execute();
+
+				// Store coin state
+				if (cc.getState().size() > 0) {
+					for (StateVariable coin_state : cc.getState()) {
+						SQL_INSERT_COIN_STATE.setString(1, cc.getCoinID().to0xString());
+						SQL_INSERT_COIN_STATE.setInt(2, coin_state.getPort());
+						SQL_INSERT_COIN_STATE.setInt(3, coin_state.getType().getValue());
+						SQL_INSERT_COIN_STATE.setString(4, coin_state.getData().toString());
+
+						//Do it.
+						SQL_INSERT_COIN_STATE.execute();
+					}
+				}
 			}
 
 			// Spent coins
