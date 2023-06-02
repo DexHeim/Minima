@@ -279,7 +279,7 @@ public class mysql extends Command {
 			lastTxPoW = mysql.loadLastTxPoW();
 			if (lastTxPoW == -1)
 				lastTxPoW = 0;
-			if (lastTxPoW > mysqllastblock)
+			if (lastTxPoW > mysqlfirstblock)
 				mysql.clearUnsynced(mysqlfirstblock);
 
 			mysql.saveIndexes();
