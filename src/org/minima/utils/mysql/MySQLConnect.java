@@ -323,6 +323,8 @@ public class MySQLConnect {
 
 		//Do it.
 		SQL_CLEAR_UNSYNCED.execute();
+
+		return true;
 	}
 
 	public void deleteIndexes() throws SQLException {
