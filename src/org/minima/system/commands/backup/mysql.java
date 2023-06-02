@@ -261,6 +261,7 @@ public class mysql extends Command {
 			//Load the files from Archive..
 			long firstarch			= arch.loadFirstBlock().getTxPoW().getBlockNumber().getAsLong();
 			long mysqlfirstblock 	= mysql.loadFirstBlock();
+			long mysqllastblock 	= mysql.loadLastBlock();
 
 			if(mysqlfirstblock>firstarch-1) {
 				throw new CommandException("Archive nodes to low.. cannot sync arch:"+firstarch+" mysql:"+mysqlfirstblock);
@@ -279,6 +280,8 @@ public class mysql extends Command {
 			lastTxPoW = mysql.loadLastTxPoW();
 			if (lastTxPoW == -1)
 				lastTxPoW = 0;
+			if (lastTxPoW > mysqllastblock)
+				mysql.clearUnsynced(mysqllastblock);
 
 			mysql.saveIndexes();
 			MinimaLogger.log("All indexes saved");
@@ -321,12 +324,11 @@ public class mysql extends Command {
 					long saveblock = block.getTxPoW().getBlockNumber().getAsLong();
 
 					//Save to MySQL..
-					mysql.saveBlock(block, true, (saveblock<lastTxPoW));
+					mysql.saveBlock(block, true);
 
 					//What block is this
 					if(saveblock>startload) {
 						startload = saveblock;
-						lastTxPoW++;
 					}
 				}
 			}

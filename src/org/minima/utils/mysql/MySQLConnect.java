@@ -72,6 +72,7 @@ public class MySQLConnect {
 	PreparedStatement SQL_DELETE_COIN_STATE		= null;
 
 	PreparedStatement SQL_SELECT_LAST_TXPOW		= null;
+	PreparedStatement SQL_CLEAR_UNSYNCED			= null;
 
 	public MySQLConnect(String zHost, String zDatabase, String zUsername, String zPassword) {
 		mMySQLHost 	= zHost;
@@ -274,6 +275,16 @@ public class MySQLConnect {
 
 		String insert_token = "INSERT IGNORE INTO token ( tokenid, coinid, name, description, url, ticker, webvalidate, object, total, totalamount, decimals, scale, script, created ) VALUES ( ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ? )";
 		SQL_INSERT_TOKEN 	= mConnection.prepareStatement(insert_token);
+
+		String clear_unsynced = "DELETE t, th, tl, tc, c, cs "
+			+ " FROM txpow t "
+    	+ " 	JOIN txheader th on t.txpowid = th.txpowid "
+    	+ " 	LEFT JOIN txpowidlist tl on t.txpowid = tl.txpowid "
+    	+ " 	LEFT JOIN txpow_coin tc on t.txpowid = tc.txpowid "
+    	+ " 	LEFT JOIN coin c on tc.coinid = c.coinid "
+    	+ " 	LEFT JOIN coin_state cs on c.coinid = cs.coinid "
+			+ " where t.block > ?";
+		SQL_CLEAR_UNSYNCED 	= mConnection.prepareStatement(clear_unsynced);
 	}
 
 	public void shutdown() {
@@ -301,6 +312,17 @@ public class MySQLConnect {
 		stmt.execute("DROP TABLE token");
 
 		stmt.close();
+	}
+
+	public synchronized boolean clearUnsynced(long zBlocknumber) throws SQLException {
+		//Get the Query ready
+		SQL_CLEAR_UNSYNCED.clearParameters();
+
+		//Set main params
+		SQL_CLEAR_UNSYNCED.setLong(1, zBlocknumber);
+
+		//Do it.
+		SQL_CLEAR_UNSYNCED.execute();
 	}
 
 	public void deleteIndexes() throws SQLException {
@@ -418,15 +440,11 @@ public class MySQLConnect {
 		return null;
 	}
 
-	public synchronized boolean saveBlock(TxBlock zBlock, boolean zSynced, boolean zClear) {
+	public synchronized boolean saveBlock(TxBlock zBlock, boolean zSynced) {
 
 		try {
 
 			if (zSynced) {
-
-				//Clear unsynced data
-				if (zClear)
-					clearUnsynced(zBlock.getTxPoW().getTxPoWID());
 
 				//get the MiniData version..
 				MiniData syncdata = MiniData.getMiniDataVersion(zBlock);
@@ -652,41 +670,6 @@ public class MySQLConnect {
 
 			//Do it.
 			SQL_INSERT_TOKEN.execute();
-
-			return true;
-
-		} catch (SQLException e) {
-			MinimaLogger.log(e);
-		}
-
-		return false;
-	}
-
-	public synchronized boolean clearUnsynced(String zTxPoWID) {
-		try {
-			SQL_DELETE_TXPOW.clearParameters();
-			SQL_DELETE_TXPOW.setString(1, zTxPoWID);
-			SQL_DELETE_TXPOW.execute();
-
-			SQL_DELETE_TXHEADER.clearParameters();
-			SQL_DELETE_TXHEADER.setString(1, zTxPoWID);
-			SQL_DELETE_TXHEADER.execute();
-
-			SQL_DELETE_TXPOWIDLIST.clearParameters();
-			SQL_DELETE_TXPOWIDLIST.setString(1, zTxPoWID);
-			SQL_DELETE_TXPOWIDLIST.execute();
-
-			SQL_DELETE_TXPOWCOIN.clearParameters();
-			SQL_DELETE_TXPOWCOIN.setString(1, zTxPoWID);
-			SQL_DELETE_TXPOWCOIN.execute();
-
-			SQL_DELETE_COIN.clearParameters();
-			SQL_DELETE_COIN.setString(1, zTxPoWID);
-			SQL_DELETE_COIN.execute();
-
-			SQL_DELETE_COIN_STATE.clearParameters();
-			SQL_DELETE_COIN_STATE.setString(1, zTxPoWID);
-			SQL_DELETE_COIN_STATE.execute();
 
 			return true;
 
