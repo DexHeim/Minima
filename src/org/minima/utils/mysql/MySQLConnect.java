@@ -917,7 +917,7 @@ public class MySQLConnect {
 		txp.calculateTXPOWID();
 		txblk = new TxBlock(txp);
 
-		mysql.saveBlock(txblk, true, false);
+		mysql.saveBlock(txblk, true);
 
 		//Now search for the top block..
 		long firstblock = mysql.loadFirstBlock();
