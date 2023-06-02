@@ -415,7 +415,7 @@ public class TxPoWProcessor extends MessageProcessor {
 
 							//Add to the MySQL DB
 							try {
-									mysqlProcessTxBlock(txpow.getBlock());
+									mysqlProcessTxBlock(newblock);
 							} catch (SQLException e) {
 									e.printStackTrace();
 							}
