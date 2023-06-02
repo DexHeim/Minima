@@ -321,6 +321,9 @@ public class MySQLConnect {
 		//Set main params
 		SQL_CLEAR_UNSYNCED.setLong(1, zBlocknumber);
 
+		//Log it
+		MinimaLogger.log("Clear unsynced blocks after: " + zBlocknumber.toString())
+
 		//Do it.
 		SQL_CLEAR_UNSYNCED.execute();
 

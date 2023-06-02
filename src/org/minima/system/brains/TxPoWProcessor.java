@@ -257,13 +257,6 @@ public class TxPoWProcessor extends MessageProcessor {
 								//Add to the RAM DB
 								MinimaDB.getDB().getTxBlockDB().addTxBlock(txblock);
 
-								//Add to the MySQL DB
-								try {
-						        mysqlProcessTxBlock(txblock);
-						    } catch (SQLException e) {
-						        e.printStackTrace();
-						    }
-
 								//Shall we log it..
 								if(GeneralParams.BLOCK_LOGS) {
 									MinimaLogger.log("Added block to tree : "+txblock.getTxPoW().getBlockNumber()+" "+txblock.getTxPoW().getTxPoWID());
@@ -420,6 +413,13 @@ public class TxPoWProcessor extends MessageProcessor {
 							//we need to recalculate the Tree
 							recalculate = true;
 
+							//Add to the MySQL DB
+							try {
+									mysqlProcessTxBlock(txpow.getBlock());
+							} catch (SQLException e) {
+									e.printStackTrace();
+							}
+
 							//Do we have children for this block
 							ArrayList<TxBlock> children = MinimaDB.getDB().getTxBlockDB().getChildBlocks(txpow.getTxPoWID());
 							for(TxBlock child : children) {
@@ -462,9 +462,6 @@ public class TxPoWProcessor extends MessageProcessor {
 
 		//Add to the RAM DB
 		MinimaDB.getDB().getTxBlockDB().addTxBlock(zTxBlock);
-
-		//Add to the MySQL DB
-		mysqlProcessTxBlock(zTxBlock);
 
 		//Add the TxPoW to the database - in case we don't have it
 		txpdb.addTxPoW(zTxBlock.getTxPoW());
