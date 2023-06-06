@@ -279,8 +279,12 @@ public class mysql extends Command {
 			lastTxPoW = mysql.loadLastTxPoW();
 			if (lastTxPoW == -1)
 				lastTxPoW = 0;
-			if (lastTxPoW > mysqlfirstblock)
+			if (lastTxPoW > mysqlfirstblock) {
 				mysql.clearUnsynced(mysqlfirstblock);
+
+				// Recalc Tree after clear unsynced blocks
+				Main.getInstance().getTxPoWProcessor().recalculateTree();
+			}
 
 			mysql.saveIndexes();
 			MinimaLogger.log("All indexes saved");

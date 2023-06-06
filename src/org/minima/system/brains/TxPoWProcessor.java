@@ -413,13 +413,6 @@ public class TxPoWProcessor extends MessageProcessor {
 							//we need to recalculate the Tree
 							recalculate = true;
 
-							//Add to the MySQL DB
-							try {
-									mysqlProcessTxBlock(zTxBlock);
-							} catch (SQLException e) {
-									e.printStackTrace();
-							}
-
 							//Do we have children for this block
 							ArrayList<TxBlock> children = MinimaDB.getDB().getTxBlockDB().getChildBlocks(txpow.getTxPoWID());
 							for(TxBlock child : children) {
@@ -519,7 +512,7 @@ public class TxPoWProcessor extends MessageProcessor {
 	}
 
 
-	private void recalculateTree() {
+	public void recalculateTree() {
 
 		//Are we shutting down..
 //		if(Main.getInstance().isShuttingDown()) {
@@ -573,6 +566,9 @@ public class TxPoWProcessor extends MessageProcessor {
 
 					//Store in the ArchiveManager
 					arch.saveBlock(txpnode.getTxBlock());
+
+					//Add to the MySQL DB
+					mysqlProcessTxBlock(zTxBlock);
 
 					//And add to the cascade
 					cascdb.addToTip(txpnode.getTxPoW());
@@ -660,6 +656,9 @@ public class TxPoWProcessor extends MessageProcessor {
 
 			//process it
 			processTxBlock(txblock);
+
+			//Add to the MySQL DB
+			mysqlProcessTxBlock(zTxBlock);
 
 		}else if(zMessage.isMessageType(TXPOWPROCESSOR_PROCESS_IBD)) {
 
@@ -783,7 +782,8 @@ public class TxPoWProcessor extends MessageProcessor {
 					processSyncBlock(block);
 					additions++;
 
-
+					//Add to the MySQL DB
+					mysqlProcessTxBlock(zTxBlock);
 
 					//Request any missing..
 					requestMissingTxns(uid,block);
@@ -909,6 +909,9 @@ public class TxPoWProcessor extends MessageProcessor {
 					//Process it..
 					processSyncBlock(block);
 					additions++;
+
+					//Add to the MySQL DB
+					mysqlProcessTxBlock(zTxBlock);
 
 					//If we've added a lot of blocks..
 					if(additions > 1000) {
