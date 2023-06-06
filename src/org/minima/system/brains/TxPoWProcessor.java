@@ -568,7 +568,7 @@ public class TxPoWProcessor extends MessageProcessor {
 					arch.saveBlock(txpnode.getTxBlock());
 
 					//Add to the MySQL DB
-					mysqlProcessTxBlock(zTxBlock);
+					mysqlProcessTxBlock(txpnode.getTxBlock());
 
 					//And add to the cascade
 					cascdb.addToTip(txpnode.getTxPoW());
@@ -658,7 +658,7 @@ public class TxPoWProcessor extends MessageProcessor {
 			processTxBlock(txblock);
 
 			//Add to the MySQL DB
-			mysqlProcessTxBlock(zTxBlock);
+			mysqlProcessTxBlock(txblock);
 
 		}else if(zMessage.isMessageType(TXPOWPROCESSOR_PROCESS_IBD)) {
 
@@ -783,7 +783,7 @@ public class TxPoWProcessor extends MessageProcessor {
 					additions++;
 
 					//Add to the MySQL DB
-					mysqlProcessTxBlock(zTxBlock);
+					mysqlProcessTxBlock(block);
 
 					//Request any missing..
 					requestMissingTxns(uid,block);
@@ -911,7 +911,7 @@ public class TxPoWProcessor extends MessageProcessor {
 					additions++;
 
 					//Add to the MySQL DB
-					mysqlProcessTxBlock(zTxBlock);
+					mysqlProcessTxBlock(block);
 
 					//If we've added a lot of blocks..
 					if(additions > 1000) {
