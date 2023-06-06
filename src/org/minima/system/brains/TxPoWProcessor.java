@@ -401,6 +401,12 @@ public class TxPoWProcessor extends MessageProcessor {
 								MinimaLogger.log("Added TxBlock to tree : "+trustedtxblock.getTxPoW().getBlockNumber()+" "+trustedtxblock.getTxPoW().getTxPoWID());
 							}
 
+							try {
+								mysqlProcessTxBlock(trustedtxblock);
+							} catch(Exception exc) {
+								MinimaLogger.log(exc);
+							}
+
 							//Create a new node - using the given TxBlock
 							TxPoWTreeNode newblock = new TxPoWTreeNode(trustedtxblock);
 
@@ -425,7 +431,7 @@ public class TxPoWProcessor extends MessageProcessor {
 												+" root:"+rootnum+" tip:"+tipnum);
 						}
 
-					}else {
+					}
 
 						//Do we have the Parent TxPoW
 						TxBlock parent = MinimaDB.getDB().getTxBlockDB().findTxBlock(txpow.getParentID().to0xString());
