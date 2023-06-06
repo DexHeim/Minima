@@ -403,8 +403,6 @@ public class TxPoWProcessor extends MessageProcessor {
 
 							try {
 								mysqlProcessTxBlock(trustedtxblock);
-							} catch(Exception exc) {
-								MinimaLogger.log(exc);
 							}
 
 							//Create a new node - using the given TxBlock
