@@ -257,6 +257,10 @@ public class TxPoWProcessor extends MessageProcessor {
 								//Add to the RAM DB
 								MinimaDB.getDB().getTxBlockDB().addTxBlock(txblock);
 
+								try {
+									mysqlProcessTxBlock(txblock);
+								}
+
 								//Shall we log it..
 								if(GeneralParams.BLOCK_LOGS) {
 									MinimaLogger.log("Added block to tree : "+txblock.getTxPoW().getBlockNumber()+" "+txblock.getTxPoW().getTxPoWID());
@@ -399,10 +403,6 @@ public class TxPoWProcessor extends MessageProcessor {
 							//Shall we log it..
 							if(GeneralParams.BLOCK_LOGS) {
 								MinimaLogger.log("Added TxBlock to tree : "+trustedtxblock.getTxPoW().getBlockNumber()+" "+trustedtxblock.getTxPoW().getTxPoWID());
-							}
-
-							try {
-								mysqlProcessTxBlock(trustedtxblock);
 							}
 
 							//Create a new node - using the given TxBlock
