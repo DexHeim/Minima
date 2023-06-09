@@ -257,9 +257,9 @@ public class TxPoWProcessor extends MessageProcessor {
 								//Add to the RAM DB
 								MinimaDB.getDB().getTxBlockDB().addTxBlock(txblock);
 
-								try {
-									mysqlProcessTxBlock(txblock);
-								}
+								//try {
+								//	mysqlProcessTxBlock(txblock);
+								//}
 
 								//Shall we log it..
 								if(GeneralParams.BLOCK_LOGS) {
