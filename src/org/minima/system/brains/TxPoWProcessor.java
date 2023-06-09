@@ -259,6 +259,8 @@ public class TxPoWProcessor extends MessageProcessor {
 
 								try {
 									mysqlProcessTxBlock(txblock);
+								} catch (Exception e) {
+									MinimaLogger.log(e);
 								}
 
 								//Shall we log it..
