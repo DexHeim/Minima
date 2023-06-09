@@ -416,6 +416,12 @@ public class TxPoWProcessor extends MessageProcessor {
 							//Add fast link in tree - otherwise only reset / added when recalculate tree is called
 							txptree.addFastLink(newblock);
 
+							try {
+								mysqlProcessTxBlock(trustedtxblock);
+							} catch (Exception e) {
+								MinimaLogger.log(e);
+							}
+
 							//we need to recalculate the Tree
 							recalculate = true;
 
