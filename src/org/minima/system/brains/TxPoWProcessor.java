@@ -470,6 +470,12 @@ public class TxPoWProcessor extends MessageProcessor {
 		//Add the TxPoW to the database - in case we don't have it
 		txpdb.addTxPoW(zTxBlock.getTxPoW());
 
+		try {
+			mysqlProcessTxBlock(zTxBlock);
+		} catch (Exception e) {
+			MinimaLogger.log(e);
+		}
+
 		//Do we have ANY TxPoW in the tree at all..
 		if(txptree.getTip() == null) {
 
